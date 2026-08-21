@@ -21,16 +21,17 @@ export function buildStreamPath(): StreamState {
   const W = root.clientWidth;
   const H = Math.max(root.scrollHeight, document.body.scrollHeight);
 
-  const narrow = W < 900;
-  const sy = window.scrollY;
-  const gutter = W < 480 ? Math.max(12, W * 0.04) : W < 900 ? 22 : 34;
+  const margin = W < 480 ? 16 : W < 900 ? 24 : 34;
 
   const nodeEls = Array.from(document.querySelectorAll<HTMLElement>('[data-node]'));
   let pts: [number, number][] = nodeEls
     .map((n) => {
       const r = n.getBoundingClientRect();
-      const ratio = Number.parseFloat(n.dataset.node || '0.5');
-      const x = narrow ? gutter : Math.min(Math.max(W * (Number.isFinite(ratio) ? ratio : 0.5), gutter), W - gutter);
+      const rawRatio = Number.parseFloat(n.dataset.node || '0.5');
+      const ratio = Number.isFinite(rawRatio) ? rawRatio : 0.5;
+      // On small screens, map ratios into 18%-82% range so the curve weaves smoothly without hitting edges
+      const targetRatio = W < 640 ? 0.18 + ratio * 0.64 : ratio;
+      const x = Math.min(Math.max(W * targetRatio, margin), W - margin);
       return [x, r.top + sy + r.height / 2] as [number, number];
     })
     .filter((p) => Number.isFinite(p[0]) && Number.isFinite(p[1]))
@@ -43,10 +44,11 @@ export function buildStreamPath(): StreamState {
   pts = pts.filter((p, i, a) => !i || p[1] - a[i - 1][1] > 2);
   pts.unshift([pts[0][0], Math.max(0, pts[0][1] - 280)]);
 
+  const sy = window.scrollY;
   const inlet = document.getElementById('tankInlet');
   if (inlet) {
     const ir = inlet.getBoundingClientRect();
-    pts.push([Math.min(Math.max(ir.left + window.scrollX, gutter), W - gutter), ir.top + sy]);
+    pts.push([Math.min(Math.max(ir.left + window.scrollX, margin), W - margin), ir.top + sy]);
   } else {
     pts.push([pts[pts.length - 1][0], H - 40]);
   }

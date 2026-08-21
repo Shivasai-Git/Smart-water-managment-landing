@@ -122,6 +122,8 @@ export const WaterStream: React.FC = () => {
 
   useScrollTick(tickCallback);
 
+  const isMobile = streamState.W > 0 && streamState.W < 640;
+
   return (
     <svg
       id="stream"
@@ -152,21 +154,21 @@ export const WaterStream: React.FC = () => {
             id="flowMask"
             fill="none"
             stroke="white"
-            strokeWidth="14"
+            strokeWidth={isMobile ? '10' : '14'}
             strokeLinecap="round"
             d={streamState.d}
             style={{ strokeDasharray: `${streamState.L} ${streamState.L}` }}
           />
         </mask>
       </defs>
-      <path id="pipe" d={streamState.d} fill="none" stroke="#7C99BA" strokeWidth="9" strokeLinecap="round" opacity=".10" />
+      <path id="pipe" d={streamState.d} fill="none" stroke="#7C99BA" strokeWidth={isMobile ? '6' : '9'} strokeLinecap="round" opacity=".10" />
       <path
         ref={glowPRef}
         id="wglow"
         d={streamState.d}
         fill="none"
         stroke="#3FA9F0"
-        strokeWidth="9"
+        strokeWidth={isMobile ? '6' : '9'}
         strokeLinecap="round"
         opacity=".13"
         style={{ strokeDasharray: `${streamState.L} ${streamState.L}` }}
@@ -177,7 +179,7 @@ export const WaterStream: React.FC = () => {
         d={streamState.d}
         fill="none"
         stroke="#3FA9F0"
-        strokeWidth="3.2"
+        strokeWidth={isMobile ? '2.4' : '3.2'}
         strokeLinecap="round"
         opacity=".55"
         style={{ strokeDasharray: `${streamState.L} ${streamState.L}` }}
@@ -187,7 +189,7 @@ export const WaterStream: React.FC = () => {
         d={streamState.d}
         fill="none"
         stroke="#8FD3FF"
-        strokeWidth="3.4"
+        strokeWidth={isMobile ? '2.6' : '3.4'}
         strokeLinecap="round"
         opacity=".95"
         mask="url(#flowReveal)"
@@ -199,7 +201,7 @@ export const WaterStream: React.FC = () => {
             ref={(el) => {
               if (el) dropsRef.current[i] = el;
             }}
-            r="3.2"
+            r={isMobile ? '2.6' : '3.2'}
             fill="#8FD3FF"
             opacity="0"
           />
@@ -211,10 +213,10 @@ export const WaterStream: React.FC = () => {
             key={i}
             cx={x.toFixed(1)}
             cy={y.toFixed(1)}
-            r="5"
+            r={isMobile ? '4' : '5'}
             fill="#04121E"
             stroke="#3FA9F0"
-            strokeWidth="1.6"
+            strokeWidth={isMobile ? '1.4' : '1.6'}
             opacity=".5"
           />
         ))}
