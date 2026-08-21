@@ -20,6 +20,7 @@ export function buildStreamPath(): StreamState {
   const root = document.documentElement;
   const W = root.clientWidth;
   const H = Math.max(root.scrollHeight, document.body.scrollHeight);
+  const sy = window.scrollY;
 
   const margin = W < 480 ? 16 : W < 900 ? 24 : 34;
 
@@ -44,7 +45,6 @@ export function buildStreamPath(): StreamState {
   pts = pts.filter((p, i, a) => !i || p[1] - a[i - 1][1] > 2);
   pts.unshift([pts[0][0], Math.max(0, pts[0][1] - 280)]);
 
-  const sy = window.scrollY;
   const inlet = document.getElementById('tankInlet');
   if (inlet) {
     const ir = inlet.getBoundingClientRect();

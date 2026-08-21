@@ -29,6 +29,7 @@ export const WaterStream: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    rebuild();
     let rt: ReturnType<typeof setTimeout>;
 
     const handleResize = () => {
@@ -39,6 +40,7 @@ export const WaterStream: React.FC = () => {
     window.addEventListener('resize', handleResize);
     window.visualViewport?.addEventListener('resize', handleResize);
 
+    const t0 = setTimeout(rebuild, 50);
     const t1 = setTimeout(rebuild, 150);
     const t2 = setTimeout(rebuild, 400);
     const t3 = setTimeout(rebuild, 1200);
@@ -68,6 +70,7 @@ export const WaterStream: React.FC = () => {
       window.removeEventListener('resize', handleResize);
       window.visualViewport?.removeEventListener('resize', handleResize);
       clearTimeout(rt);
+      clearTimeout(t0);
       clearTimeout(t1);
       clearTimeout(t2);
       clearTimeout(t3);
@@ -161,7 +164,7 @@ export const WaterStream: React.FC = () => {
           />
         </mask>
       </defs>
-      <path id="pipe" d={streamState.d} fill="none" stroke="#7C99BA" strokeWidth={isMobile ? '6' : '9'} strokeLinecap="round" opacity=".10" />
+      <path id="pipe" d={streamState.d} fill="none" stroke="#7C99BA" strokeWidth={isMobile ? '6' : '9'} strokeLinecap="round" opacity=".22" />
       <path
         ref={glowPRef}
         id="wglow"
@@ -170,7 +173,7 @@ export const WaterStream: React.FC = () => {
         stroke="#3FA9F0"
         strokeWidth={isMobile ? '6' : '9'}
         strokeLinecap="round"
-        opacity=".13"
+        opacity=".25"
         style={{ strokeDasharray: `${streamState.L} ${streamState.L}` }}
       />
       <path
@@ -181,7 +184,7 @@ export const WaterStream: React.FC = () => {
         stroke="#3FA9F0"
         strokeWidth={isMobile ? '2.4' : '3.2'}
         strokeLinecap="round"
-        opacity=".55"
+        opacity=".85"
         style={{ strokeDasharray: `${streamState.L} ${streamState.L}` }}
       />
       <path
@@ -191,7 +194,7 @@ export const WaterStream: React.FC = () => {
         stroke="#8FD3FF"
         strokeWidth={isMobile ? '2.6' : '3.4'}
         strokeLinecap="round"
-        opacity=".95"
+        opacity="1"
         mask="url(#flowReveal)"
       />
       <g id="drops">
@@ -217,7 +220,7 @@ export const WaterStream: React.FC = () => {
             fill="#04121E"
             stroke="#3FA9F0"
             strokeWidth={isMobile ? '1.4' : '1.6'}
-            opacity=".5"
+            opacity=".8"
           />
         ))}
       </g>
