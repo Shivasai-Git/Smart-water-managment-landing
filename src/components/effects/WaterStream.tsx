@@ -23,9 +23,12 @@ export const WaterStream: React.FC = () => {
   const glowPRef = useRef<SVGPathElement | null>(null);
   const flowMaskRef = useRef<SVGPathElement | null>(null);
 
+  const stagesRef = useRef<HTMLElement[]>([]);
+
   const rebuild = useCallback(() => {
     const nextState = buildStreamPath();
     setStreamState(nextState);
+    stagesRef.current = Array.from(document.querySelectorAll<HTMLElement>('.stage'));
   }, []);
 
   useEffect(() => {
@@ -34,16 +37,14 @@ export const WaterStream: React.FC = () => {
 
     const handleResize = () => {
       clearTimeout(rt);
-      rt = setTimeout(rebuild, 220);
+      rt = setTimeout(rebuild, 250);
     };
 
-    window.addEventListener('resize', handleResize);
-    window.visualViewport?.addEventListener('resize', handleResize);
+    window.addEventListener('resize', handleResize, { passive: true });
+    window.visualViewport?.addEventListener('resize', handleResize, { passive: true });
 
-    const t0 = setTimeout(rebuild, 50);
-    const t1 = setTimeout(rebuild, 150);
-    const t2 = setTimeout(rebuild, 400);
-    const t3 = setTimeout(rebuild, 1200);
+    const t0 = setTimeout(rebuild, 60);
+    const t1 = setTimeout(rebuild, 350);
 
     let ro: ResizeObserver | null = null;
     if (typeof ResizeObserver !== 'undefined') {
@@ -52,18 +53,19 @@ export const WaterStream: React.FC = () => {
       ro = new ResizeObserver(() => {
         const h = document.documentElement.scrollHeight;
         const w = document.documentElement.clientWidth;
-        if (Math.abs(h - lastH) > 24 || Math.abs(w - lastW) > 1) {
+        // Ignore minor mobile address bar height fluctuations (< 90px)
+        if (Math.abs(h - lastH) > 90 || Math.abs(w - lastW) > 8) {
           lastW = w;
           lastH = h;
           clearTimeout(rt);
-          rt = setTimeout(rebuild, 140);
+          rt = setTimeout(rebuild, 180);
         }
       });
       ro.observe(document.body);
     }
 
     if (document.fonts) {
-      document.fonts.ready.then(() => setTimeout(rebuild, 80));
+      document.fonts.ready.then(() => setTimeout(rebuild, 100));
     }
 
     return () => {
@@ -72,8 +74,6 @@ export const WaterStream: React.FC = () => {
       clearTimeout(rt);
       clearTimeout(t0);
       clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
       if (ro) ro.disconnect();
     };
   }, [rebuild]);
@@ -92,7 +92,7 @@ export const WaterStream: React.FC = () => {
       if (glowPRef.current) glowPRef.current.style.strokeDashoffset = off;
       if (flowMaskRef.current) flowMaskRef.current.style.strokeDashoffset = off;
 
-      const stages = Array.from(document.querySelectorAll<HTMLElement>('.stage'));
+      const stages = stagesRef.current;
       for (let i = 0; i < stages.length; i++) {
         if (streamState.stageOff[i]) {
           const top = streamState.stageOff[i][0] - sy;
@@ -101,7 +101,8 @@ export const WaterStream: React.FC = () => {
         }
       }
 
-      if (isReduced || p <= 0) return;
+      const isMobile = streamState.W > 0 && streamState.W < 640;
+      if (isReduced || p <= 0 || isMobile) return;
 
       const base = now * 4e-5;
       const dropEls = dropsRef.current;
@@ -126,6 +127,7 @@ export const WaterStream: React.FC = () => {
   useScrollTick(tickCallback);
 
   const isMobile = streamState.W > 0 && streamState.W < 640;
+
 
   return (
     <svg

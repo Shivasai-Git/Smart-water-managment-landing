@@ -48,6 +48,8 @@ export const IsoSystemScene: React.FC = () => {
     const top = wTopRef.current - window.scrollY;
     const vh = window.visualViewport?.height || window.innerHeight;
 
+    if (top > vh * 1.6 || top < -vh * 1.6) return;
+
     if (top < vh * 0.9 && !shownRef.current) {
       shownRef.current = true;
       wrapRef.current.classList.add('on');
@@ -65,8 +67,9 @@ export const IsoSystemScene: React.FC = () => {
     const fill = Math.max(0, Math.min(1, (vh * 0.88 - top) / travel));
     fillRef.current = fill;
 
-    if (Math.abs(fill - lastRef.current) < 0.0015) return;
+    if (Math.abs(fill - lastRef.current) < 0.002) return;
     lastRef.current = fill;
+
 
     const botY = 420 + (2.3 + 2.3) * 15 - 7.5 * 30 - 6;
     const topY = 420 + (2.3 + 2.3) * 15 - 11.3 * 30 + 11;

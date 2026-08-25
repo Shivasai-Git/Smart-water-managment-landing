@@ -8,7 +8,6 @@ import { useRevealObserver } from './hooks/useRevealObserver';
 
 import { HeroSection } from './components/sections/HeroSection';
 import { TickerSection } from './components/sections/TickerSection';
-import { MomentSection } from './components/sections/MomentSection';
 import { CostSection } from './components/sections/CostSection';
 import { GapSection } from './components/sections/GapSection';
 import { SystemSection } from './components/sections/SystemSection';
@@ -31,25 +30,18 @@ export const App: React.FC = () => {
       <main>
         <HeroSection />
         <TickerSection />
-        <MomentSection />
-        <WaveSeparator />
         <CostSection />
-        <WaveSeparator />
         <GapSection />
         <WaveSeparator />
         <SystemSection />
-        <WaveSeparator />
         <LoopSection />
         <WaveSeparator />
         <TracksSection />
-        <WaveSeparator />
         <StartSection />
-        <WaveSeparator />
         <EdgeSection />
         <StackSection />
         <WaveSeparator />
         <RoadmapSection />
-        <WaveSeparator />
         <CloseSection />
       </main>
       <Footer />
@@ -58,3 +50,4 @@ export const App: React.FC = () => {
 };
 
 export default App;
+

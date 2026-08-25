@@ -41,15 +41,15 @@ export const HeroSection: React.FC = () => {
             </span>
             .
           </h1>
-          <p className="lift mt-9 text-[17px] leading-relaxed text-steel max-w-[31rem]" style={{ animationDelay: '.3s' }}>
-            Electricity has a meter. Gas has a gauge. Water has a person climbing to the terrace with a torch — or a motor that runs until somebody notices the overflow.
+          <p className="lift mt-8 text-[17px] leading-relaxed text-steel max-w-[34rem]" style={{ animationDelay: '.3s' }}>
+            A connected platform bringing rooftop tanks, automated pump control, leak detection, water quality, geysers, and RO units into one intelligent mobile dashboard.
           </p>
-          <div className="lift mt-10 flex flex-wrap items-center gap-4" style={{ animationDelay: '.42s' }}>
-            <a href="#system" className="group inline-flex items-center gap-2.5 px-6 py-3.5 rounded-full bg-aqua text-ink font-medium text-[15px] hover:bg-mist transition-colors">
-              See the system <span className="transition-transform group-hover:translate-x-1">→</span>
+          <div className="lift mt-8 flex flex-wrap items-center gap-3.5" style={{ animationDelay: '.42s' }}>
+            <a href="#system" className="group inline-flex items-center gap-2.5 px-6 py-3 rounded-full bg-aqua text-ink font-medium text-[14px] hover:bg-mist transition-colors">
+              Explore System <span className="transition-transform group-hover:translate-x-1">→</span>
             </a>
-            <a href="#cost" className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-full border border-white/15 text-mist text-[15px] hover:border-aqua/60 hover:text-aqua transition-colors">
-              What it costs today
+            <a href="#tracks" className="inline-flex items-center gap-2.5 px-6 py-3 rounded-full border border-white/15 text-mist text-[14px] hover:border-aqua/60 hover:text-aqua transition-colors">
+              Retrofit & Wired Tracks
             </a>
           </div>
           <div className="lift mt-14 flex flex-wrap gap-x-10 gap-y-5 font-mono text-[11px] tracking-[.1em] uppercase" style={{ animationDelay: '.55s' }}>

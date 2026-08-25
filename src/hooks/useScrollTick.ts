@@ -6,6 +6,8 @@ const tickSubscribers = new Set<TickCallback>();
 let sy = 0;
 let moved = true;
 let isLoopRunning = false;
+let rafId: number | null = null;
+let idleFrames = 0;
 
 export function getScrollState() {
   return { sy, moved };
@@ -13,8 +15,15 @@ export function getScrollState() {
 
 function tickLoop(t: number) {
   const currentY = window.scrollY;
-  moved = Math.abs(currentY - sy) > 0.5;
+  const delta = Math.abs(currentY - sy);
+  moved = delta > 0.5;
   sy = currentY;
+
+  if (moved) {
+    idleFrames = 0;
+  } else {
+    idleFrames++;
+  }
 
   tickSubscribers.forEach((cb) => {
     try {
@@ -24,29 +33,46 @@ function tickLoop(t: number) {
     }
   });
 
-  if (tickSubscribers.size > 0) {
-    requestAnimationFrame(tickLoop);
+  // Keep looping during active scrolling or for a brief settle period, then pause to save mobile battery and GPU
+  if (tickSubscribers.size > 0 && idleFrames < 120) {
+    rafId = requestAnimationFrame(tickLoop);
   } else {
     isLoopRunning = false;
+    rafId = null;
   }
 }
 
-function startLoopIfNeeded() {
+function wakeLoop() {
+  idleFrames = 0;
   if (!isLoopRunning) {
     isLoopRunning = true;
     sy = window.scrollY;
     moved = true;
-    requestAnimationFrame(tickLoop);
+    rafId = requestAnimationFrame(tickLoop);
   }
 }
 
 export function useScrollTick(callback: TickCallback) {
   useEffect(() => {
     tickSubscribers.add(callback);
-    startLoopIfNeeded();
+    wakeLoop();
+
+    const onPassiveScroll = () => {
+      wakeLoop();
+    };
+
+    window.addEventListener('scroll', onPassiveScroll, { passive: true });
+    window.addEventListener('resize', onPassiveScroll, { passive: true });
 
     return () => {
       tickSubscribers.delete(callback);
+      window.removeEventListener('scroll', onPassiveScroll);
+      window.removeEventListener('resize', onPassiveScroll);
+      if (tickSubscribers.size === 0 && rafId !== null) {
+        cancelAnimationFrame(rafId);
+        isLoopRunning = false;
+      }
     };
   }, [callback]);
 }
+

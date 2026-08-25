@@ -21,9 +21,9 @@ const HeroTankScene: React.FC<HeroTankSceneProps> = ({ level }) => {
   const ringsRef = useRef<THREE.Mesh[]>([]);
 
   const compact = size.width < 640;
-  const particleCount = compact ? 42 : 90;
+  const particleCount = compact ? 16 : 80;
 
-  const surfGeo = useMemo(() => new THREE.CircleGeometry(2.34, 56), []);
+  const surfGeo = useMemo(() => new THREE.CircleGeometry(2.34, compact ? 24 : 56), [compact]);
   const basePos = useMemo(() => surfGeo.attributes.position.array.slice(), [surfGeo]);
 
   const [particleGeo, particleSpeeds] = useMemo(() => {
@@ -45,18 +45,20 @@ const HeroTankScene: React.FC<HeroTankSceneProps> = ({ level }) => {
   const mouseRef = useRef({ tx: 0, ty: 0, mx: 0, my: 0 });
 
   useEffect(() => {
+    if (compact) return;
     const handleMouseMove = (e: MouseEvent) => {
       mouseRef.current.tx = e.clientX / window.innerWidth - 0.5;
       mouseRef.current.ty = e.clientY / window.innerHeight - 0.5;
     };
-    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
     return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
+  }, [compact]);
 
   useFrame((state) => {
     const sy = window.scrollY;
     const heroH = document.getElementById('top')?.offsetHeight || window.innerHeight;
-    if (sy > heroH + 340) return;
+    // When hero is scrolled out of view, completely stop frame calculations
+    if (sy > heroH + 100) return;
 
     const t = state.clock.getElapsedTime();
     const mouse = mouseRef.current;
@@ -72,7 +74,8 @@ const HeroTankScene: React.FC<HeroTankSceneProps> = ({ level }) => {
       }
     }
 
-    if (surfGeoRef.current) {
+    // Skip heavy vertex wave calculation on mobile
+    if (!compact && surfGeoRef.current) {
       const p = surfGeoRef.current.attributes.position.array as Float32Array;
       for (let i = 0; i < p.length; i += 3) {
         const x = basePos[i];
@@ -89,12 +92,14 @@ const HeroTankScene: React.FC<HeroTankSceneProps> = ({ level }) => {
       ledMatRef.current.emissiveIntensity = 1.4 + Math.sin(t * 3.4) * 1.1;
     }
 
-    ringsRef.current.forEach((r, i) => {
-      if (r) {
-        r.rotation.z += 0.0022 * (i + 1);
-        r.position.y = -0.4 + i * 0.5 + Math.sin(t * 0.7 + i) * 0.12;
-      }
-    });
+    if (!compact) {
+      ringsRef.current.forEach((r, i) => {
+        if (r) {
+          r.rotation.z += 0.0022 * (i + 1);
+          r.position.y = -0.4 + i * 0.5 + Math.sin(t * 0.7 + i) * 0.12;
+        }
+      });
+    }
 
     if (particlesRef.current) {
       const a = particleGeo.attributes.position.array as Float32Array;
@@ -105,7 +110,7 @@ const HeroTankScene: React.FC<HeroTankSceneProps> = ({ level }) => {
       particleGeo.attributes.position.needsUpdate = true;
     }
 
-    if (!isReduced && rigRef.current) {
+    if (!isReduced && !compact && rigRef.current) {
       mouse.mx += (mouse.tx - mouse.mx) * 0.045;
       mouse.my += (mouse.ty - mouse.my) * 0.045;
       rigRef.current.rotation.y = t * 0.13 + mouse.mx * 0.5;
@@ -124,7 +129,7 @@ const HeroTankScene: React.FC<HeroTankSceneProps> = ({ level }) => {
 
       <group ref={rigRef} rotation={[0.13, 0, 0]}>
         <mesh>
-          <cylinderGeometry args={[2.5, 2.2, 5.4, 64, 1, true]} />
+          <cylinderGeometry args={[2.5, 2.2, 5.4, compact ? 28 : 56, 1, true]} />
           <meshStandardMaterial
             color={0x9fb4d4}
             metalness={0.1}
@@ -137,13 +142,13 @@ const HeroTankScene: React.FC<HeroTankSceneProps> = ({ level }) => {
 
         {[0, 1, 2, 3].map((i) => (
           <mesh key={i} rotation={[Math.PI / 2, 0, 0]} position={[0, 1.9 - i * 1.25, 0]}>
-            <torusGeometry args={[2.42 - i * 0.04, 0.035, 10, 64]} />
+            <torusGeometry args={[2.42 - i * 0.04, 0.035, 8, compact ? 28 : 56]} />
             <meshStandardMaterial color={0x7c99ba} roughness={0.6} transparent opacity={0.35} />
           </mesh>
         ))}
 
         <mesh ref={waterMeshRef} position={[0, -2.7 + 0.5, 0]}>
-          <cylinderGeometry args={[2.34, 2.12, 1, 48]} />
+          <cylinderGeometry args={[2.34, 2.12, 1, compact ? 24 : 48]} />
           <meshStandardMaterial color={0x3fa9f0} transparent opacity={0.42} roughness={0.1} metalness={0.25} />
         </mesh>
 
@@ -161,11 +166,11 @@ const HeroTankScene: React.FC<HeroTankSceneProps> = ({ level }) => {
 
         <group ref={puckRef} position={[1.55, 3.05, 0]}>
           <mesh>
-            <cylinderGeometry args={[0.46, 0.5, 0.3, 32]} />
+            <cylinderGeometry args={[0.46, 0.5, 0.3, compact ? 16 : 32]} />
             <meshStandardMaterial color={0x3fa9f0} roughness={0.28} metalness={0.45} />
           </mesh>
           <mesh position={[0, 0.18, 0]}>
-            <sphereGeometry args={[0.09, 16, 16]} />
+            <sphereGeometry args={[0.09, 12, 12]} />
             <meshStandardMaterial
               ref={ledMatRef}
               color={0xffffff}
@@ -176,31 +181,32 @@ const HeroTankScene: React.FC<HeroTankSceneProps> = ({ level }) => {
         </group>
 
         <mesh position={[1.55, 1.9, 0]}>
-          <coneGeometry args={[0.62, 2.4, 28, 1, true]} />
+          <coneGeometry args={[0.62, 2.4, compact ? 16 : 28, 1, true]} />
           <meshBasicMaterial color={0x3fa9f0} transparent opacity={0.07} side={THREE.DoubleSide} />
         </mesh>
 
-        {[0, 1, 2].map((i) => (
-          <mesh
-            key={i}
-            ref={(el) => {
-              if (el) ringsRef.current[i] = el;
-            }}
-            rotation={[Math.PI / 2 + (i - 1) * 0.22, 0, 0]}
-            position={[0, -0.4 + i * 0.5, 0]}
-          >
-            <torusGeometry args={[3.3 + i * 0.5, 0.008, 8, 100]} />
-            <meshBasicMaterial
-              color={i === 1 ? 0xffa03c : 0x3fa9f0}
-              transparent
-              opacity={0.3 - i * 0.07}
-            />
-          </mesh>
-        ))}
+        {!compact &&
+          [0, 1, 2].map((i) => (
+            <mesh
+              key={i}
+              ref={(el) => {
+                if (el) ringsRef.current[i] = el;
+              }}
+              rotation={[Math.PI / 2 + (i - 1) * 0.22, 0, 0]}
+              position={[0, -0.4 + i * 0.5, 0]}
+            >
+              <torusGeometry args={[3.3 + i * 0.5, 0.008, 6, 64]} />
+              <meshBasicMaterial
+                color={i === 1 ? 0xffa03c : 0x3fa9f0}
+                transparent
+                opacity={0.3 - i * 0.07}
+              />
+            </mesh>
+          ))}
       </group>
 
       <points ref={particlesRef} geometry={particleGeo}>
-        <pointsMaterial color={0x3fa9f0} size={0.055} transparent opacity={0.55} />
+        <pointsMaterial color={0x3fa9f0} size={compact ? 0.045 : 0.055} transparent opacity={0.55} />
       </points>
     </>
   );
@@ -208,9 +214,11 @@ const HeroTankScene: React.FC<HeroTankSceneProps> = ({ level }) => {
 
 export const HeroTank3D: React.FC<{ level: number }> = ({ level }) => {
   const [mounted, setMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    setIsMobile(window.innerWidth < 640);
   }, []);
 
   return (
@@ -223,11 +231,17 @@ export const HeroTank3D: React.FC<{ level: number }> = ({ level }) => {
     >
       <Canvas
         camera={{ position: [0, 1.6, 12], fov: 38, near: 0.1, far: 100 }}
-        gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
-        dpr={[1, 1.6]}
+        gl={{
+          antialias: !isMobile,
+          alpha: true,
+          powerPreference: isMobile ? 'default' : 'high-performance',
+          preserveDrawingBuffer: false,
+        }}
+        dpr={isMobile ? 1 : [1, 1.5]}
       >
         <HeroTankScene level={level} />
       </Canvas>
     </div>
   );
 };
+

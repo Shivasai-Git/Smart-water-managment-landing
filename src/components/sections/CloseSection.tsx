@@ -5,51 +5,48 @@ import { IsoSystemScene } from '../effects/IsoSystemScene';
 
 export const CloseSection: React.FC = () => {
   return (
-    <section id="close" className="max-w-shell mx-auto px-6 py-32 md:py-40">
-      <Reveal className="text-center">
-        <SectionLabel color="aqua" className="mb-7">
-          The whole idea, in one line
+    <section id="close" className="max-w-shell mx-auto px-6 py-14 md:py-24">
+      <Reveal className="text-center mb-8">
+        <SectionLabel color="aqua" className="mb-4">
+          The core thesis
         </SectionLabel>
-        <h2 className="font-display font-extrabold text-[clamp(2rem,5.8vw,4.1rem)] leading-[1] tracking-[-.035em] max-w-4xl mx-auto">
+        <h2 className="font-display font-extrabold text-[clamp(1.9rem,4.5vw,3.2rem)] leading-[1.05] tracking-[-.035em] max-w-3xl mx-auto">
           Make water visible. Everything else follows.
         </h2>
-        <p className="mt-9 text-[17px] leading-relaxed text-steel max-w-2xl mx-auto">
-          Every problem here — the overflow, the dry tank, the burnt motor, the hidden leak, the filter nobody changed — is a consequence of water being the one thing in the home we cannot see.
+        <p className="mt-4 text-[15px] leading-relaxed text-steel max-w-xl mx-auto">
+          Overflows, dry tanks, burnt motors, and hidden leaks are symptoms of managing water in the dark.
         </p>
       </Reveal>
 
       <IsoSystemScene />
 
-      <Reveal className="mt-24 max-w-3xl mx-auto text-center">
-        <blockquote className="font-display text-[clamp(1.2rem,2.6vw,1.7rem)] leading-snug text-mist">
-          "Nobody knew how much water was in their tank. That's not carelessness — it's just that nobody has ever been given a way to know."
-        </blockquote>
-      </Reveal>
-      <Reveal className="mt-20 grid md:grid-cols-3 gap-5">
-        <div className="panel rounded-2xl p-8 text-center">
-          <h3 className="font-display font-semibold text-lg mb-2.5">One system</h3>
-          <p className="text-[15px] leading-relaxed text-steel">Tank, pump, quality, leak — monitored together, not in silos.</p>
+      <Reveal className="mt-10 grid sm:grid-cols-3 gap-3">
+        <div className="panel rounded-xl p-5 text-center">
+          <h3 className="font-display font-semibold text-base mb-1 text-mist">One System</h3>
+          <p className="text-xs leading-relaxed text-steel">Tank, pump, quality, leak — monitored together, not in silos.</p>
         </div>
-        <div className="panel rounded-2xl p-8 text-center">
-          <h3 className="font-display font-semibold text-lg mb-2.5">One view</h3>
-          <p className="text-[15px] leading-relaxed text-steel">A single app that answers the only question that matters: is my water okay?</p>
+        <div className="panel rounded-xl p-5 text-center">
+          <h3 className="font-display font-semibold text-base mb-1 text-mist">One View</h3>
+          <p className="text-xs leading-relaxed text-steel">Single mobile app answering the key question: is my water okay?</p>
         </div>
-        <div className="panel rounded-2xl p-8 text-center">
-          <h3 className="font-display font-semibold text-lg mb-2.5">Always working</h3>
-          <p className="text-[15px] leading-relaxed text-steel">Whether or not anyone is paying attention. That's the point.</p>
+        <div className="panel rounded-xl p-5 text-center">
+          <h3 className="font-display font-semibold text-base mb-1 text-mist">Autonomous Guard</h3>
+          <p className="text-xs leading-relaxed text-steel">Safeguards motors and tanks without requiring human memory.</p>
         </div>
       </Reveal>
-      <Reveal className="mt-16 flex flex-col sm:flex-row items-center justify-center gap-4">
+
+      <Reveal className="mt-10 flex flex-wrap items-center justify-center gap-3">
         <a
-          href="#"
-          className="group inline-flex items-center gap-2.5 px-8 py-4 rounded-full bg-aqua text-ink font-medium hover:bg-mist transition-colors"
+          href="#top"
+          className="group inline-flex items-center gap-2 px-6 py-3 rounded-full bg-aqua text-ink font-medium text-sm hover:bg-mist transition-colors"
         >
-          Book a site visit <span className="transition-transform group-hover:translate-x-1">→</span>
+          Explore Prototype Specs <span className="transition-transform group-hover:-translate-y-0.5">↑</span>
         </a>
-        <a href="#" className="px-8 py-4 rounded-full border border-white/15 hover:border-aqua/60 hover:text-aqua transition-colors">
-          Talk to us about a hostel
+        <a href="#tracks" className="px-6 py-3 rounded-full border border-white/15 text-mist text-sm hover:border-aqua/60 hover:text-aqua transition-colors">
+          View Retrofit Track
         </a>
       </Reveal>
     </section>
   );
 };
+

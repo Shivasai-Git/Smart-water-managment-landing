@@ -9,18 +9,18 @@ export const TracksSection: React.FC = () => {
   const track = TRACKS[activeTrack];
 
   return (
-    <section id="tracks" className="py-28 md:py-36 border-y border-white/8">
+    <section id="tracks" className="py-14 md:py-20 border-y border-white/8">
       <div className="max-w-shell mx-auto px-6">
-        <Reveal className="max-w-2xl mb-14">
-          <SectionLabel color="aqua">Two ways in</SectionLabel>
-          <h2 className="font-display font-bold text-[clamp(1.8rem,4.2vw,3rem)] leading-[1.04] tracking-[-.03em]">
-            A version for new buildings. A version for the one you already live in.
+        <Reveal className="max-w-3xl mb-8">
+          <SectionLabel color="aqua">Two installation tracks</SectionLabel>
+          <h2 className="font-display font-bold text-[clamp(1.8rem,3.8vw,2.8rem)] leading-[1.05] tracking-[-.03em]">
+            For new buildings, and the one you live in today.
           </h2>
         </Reveal>
 
         <Reveal
           id="trackTabs"
-          className="inline-flex relative p-1 rounded-full border border-white/12 bg-ink mb-12"
+          className="inline-flex relative p-1 rounded-full border border-white/12 bg-ink mb-8"
         >
           <span
             id="trackInd"
@@ -35,8 +35,8 @@ export const TracksSection: React.FC = () => {
             data-track="0"
             role="tab"
             aria-selected={activeTrack === 0}
-            className={`track-btn relative z-10 px-5 py-2.5 font-mono text-[11px] tracking-[.13em] uppercase w-[158px] ${
-              activeTrack === 0 ? 'text-ink' : 'text-steel'
+            className={`track-btn relative z-10 px-5 py-2 font-mono text-[11px] tracking-[.13em] uppercase w-[158px] ${
+              activeTrack === 0 ? 'text-ink font-medium' : 'text-steel'
             }`}
             onClick={() => setActiveTrack(0)}
           >
@@ -47,8 +47,8 @@ export const TracksSection: React.FC = () => {
             data-track="1"
             role="tab"
             aria-selected={activeTrack === 1}
-            className={`track-btn relative z-10 px-5 py-2.5 font-mono text-[11px] tracking-[.13em] uppercase w-[158px] ${
-              activeTrack === 1 ? 'text-ink' : 'text-steel'
+            className={`track-btn relative z-10 px-5 py-2 font-mono text-[11px] tracking-[.13em] uppercase w-[158px] ${
+              activeTrack === 1 ? 'text-ink font-medium' : 'text-steel'
             }`}
             onClick={() => setActiveTrack(1)}
           >
@@ -56,36 +56,36 @@ export const TracksSection: React.FC = () => {
           </button>
         </Reveal>
 
-        <div className="grid lg:grid-cols-[1fr_1.1fr] gap-12 lg:gap-16 items-center">
+        <div className="grid lg:grid-cols-[1fr_1.1fr] gap-8 lg:gap-12 items-center">
           <Reveal id="trackCopy">
-            <h3 className="font-display font-bold text-3xl tracking-[-.02em] mb-4" id="tcTitle">
+            <h3 className="font-display font-bold text-2xl tracking-[-.02em] mb-3" id="tcTitle">
               {track.title}
             </h3>
-            <p className="text-[16px] leading-relaxed text-steel mb-8" id="tcBody">
+            <p className="text-[15px] leading-relaxed text-steel mb-6" id="tcBody">
               {track.body}
             </p>
-            <ul className="space-y-4" id="tcList">
+            <ul className="space-y-3" id="tcList">
               {track.list.map(([k, v], idx) => (
-                <li key={idx} className="flex items-baseline justify-between gap-6 pb-4 border-b border-white/8">
+                <li key={idx} className="flex items-baseline justify-between gap-4 pb-3 border-b border-white/8 text-sm">
                   <span className="font-mono text-[10px] tracking-[.16em] uppercase text-steel/70">{k}</span>
-                  <span className="text-[15px] text-mist text-right">{v}</span>
+                  <span className="text-[14px] text-mist text-right font-medium">{v}</span>
                 </li>
               ))}
             </ul>
           </Reveal>
-          <Reveal className="panel rounded-2xl p-6 md:p-8">
-            <div className="flex items-center justify-between mb-5 font-mono text-[10px] tracking-[.18em] uppercase text-steel">
+          <Reveal className="panel rounded-xl p-5 md:p-6">
+            <div className="flex items-center justify-between mb-4 font-mono text-[10px] tracking-[.18em] uppercase text-steel">
               <span id="dgLabel">{track.label}</span>
-              <span className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-aqua"></span>Live
+              <span className="flex items-center gap-1.5 text-aqua">
+                <span className="w-1.5 h-1.5 rounded-full bg-aqua animate-pulse"></span>Active Model
               </span>
             </div>
             <div id="dgWrap" dangerouslySetInnerHTML={{ __html: track.svg }} />
           </Reveal>
         </div>
 
-        <Reveal className="mt-14 text-[17px] leading-relaxed text-mist max-w-3xl border-l-2 border-aqua pl-5">
-          If we only build for new construction, we're building for a market that arrives slowly and by permission. The retrofit path is how this reaches people this year — including every rented flat and hostel where nobody has permission to drill anything.
+        <Reveal className="mt-8 text-sm leading-relaxed text-mist max-w-3xl border-l-2 border-aqua pl-4 bg-aqua/[0.02] py-2">
+          The retrofit path is how Smart Water Flow deploys instantly — zero wall drilling, zero pipe cutting, ideal for rented flats, student hostels, and residential communities.
         </Reveal>
 
         <StreamNode ratio=".13" />
@@ -93,3 +93,4 @@ export const TracksSection: React.FC = () => {
     </section>
   );
 };
+
