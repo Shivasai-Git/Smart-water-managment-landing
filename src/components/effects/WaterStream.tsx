@@ -1,231 +1,185 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { useScrollTick } from '../../hooks/useScrollTick';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { buildIndustrialNetwork, type IndustrialSystemNetwork } from '../../lib/industrialPipes';
+import { StreamNode } from '../ui/StreamNode';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
-import { buildStreamPath, progressAtY, type StreamState, NDROPS, SN } from '../../lib/streamPath';
 
-export const WaterStream: React.FC = () => {
+interface WaterStreamProps {
+  className?: string;
+}
+
+export const WaterStream: React.FC<WaterStreamProps> = ({ className = '' }) => {
   const isReduced = useReducedMotion();
-  const [streamState, setStreamState] = useState<StreamState>({
-    L: 0,
-    samples: null,
-    stageOff: [],
-    built: false,
-    d: '',
-    joints: [],
-    W: 0,
-    H: 0,
-  });
+  const [network, setNetwork] = useState<IndustrialSystemNetwork | null>(null);
+  const resizeTimerRef = useRef<number | null>(null);
 
-  const progRef = useRef(0);
-  const dropsRef = useRef<SVGCircleElement[]>([]);
+  // Cached layout values to eliminate layout thrashing
+  const totalWaterLenRef = useRef<number>(1500);
+  const waterFillPathRef = useRef<SVGPathElement>(null);
+  const rafIdRef = useRef<number | null>(null);
 
-  const waterPRef = useRef<SVGPathElement | null>(null);
-  const glowPRef = useRef<SVGPathElement | null>(null);
-  const flowMaskRef = useRef<SVGPathElement | null>(null);
-
-  const stagesRef = useRef<HTMLElement[]>([]);
-
-  const rebuild = useCallback(() => {
-    const nextState = buildStreamPath();
-    setStreamState(nextState);
-    stagesRef.current = Array.from(document.querySelectorAll<HTMLElement>('.stage'));
+  const updateNetwork = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    const net = buildIndustrialNetwork();
+    totalWaterLenRef.current = net.totalWaterLength || 1500;
+    setNetwork(net);
   }, []);
 
   useEffect(() => {
-    rebuild();
-    let rt: ReturnType<typeof setTimeout>;
+    const timer = setTimeout(updateNetwork, 100);
 
     const handleResize = () => {
-      clearTimeout(rt);
-      rt = setTimeout(rebuild, 250);
+      if (resizeTimerRef.current) window.clearTimeout(resizeTimerRef.current);
+      resizeTimerRef.current = window.setTimeout(updateNetwork, 150);
     };
 
     window.addEventListener('resize', handleResize, { passive: true });
-    window.visualViewport?.addEventListener('resize', handleResize, { passive: true });
-
-    const t0 = setTimeout(rebuild, 60);
-    const t1 = setTimeout(rebuild, 350);
-
-    let ro: ResizeObserver | null = null;
-    if (typeof ResizeObserver !== 'undefined') {
-      let lastH = document.documentElement.scrollHeight;
-      let lastW = document.documentElement.clientWidth;
-      ro = new ResizeObserver(() => {
-        const h = document.documentElement.scrollHeight;
-        const w = document.documentElement.clientWidth;
-        // Ignore minor mobile address bar height fluctuations (< 90px)
-        if (Math.abs(h - lastH) > 90 || Math.abs(w - lastW) > 8) {
-          lastW = w;
-          lastH = h;
-          clearTimeout(rt);
-          rt = setTimeout(rebuild, 180);
-        }
-      });
-      ro.observe(document.body);
-    }
-
-    if (document.fonts) {
-      document.fonts.ready.then(() => setTimeout(rebuild, 100));
-    }
+    window.addEventListener('orientationchange', handleResize, { passive: true });
 
     return () => {
+      clearTimeout(timer);
+      if (resizeTimerRef.current) window.clearTimeout(resizeTimerRef.current);
       window.removeEventListener('resize', handleResize);
-      window.visualViewport?.removeEventListener('resize', handleResize);
-      clearTimeout(rt);
-      clearTimeout(t0);
-      clearTimeout(t1);
-      if (ro) ro.disconnect();
+      window.removeEventListener('orientationchange', handleResize);
     };
-  }, [rebuild]);
+  }, [updateNetwork]);
 
-  const tickCallback = useCallback(
-    (now: number) => {
-      if (!streamState.built || !streamState.samples) return;
+  // High-Performance Passive Scroll Listener (Pure GPU Compositor friendly)
+  useEffect(() => {
+    if (isReduced) return;
 
-      const vh = window.visualViewport?.height || window.innerHeight;
-      const sy = window.scrollY;
-      const p = progressAtY(sy + vh * 0.82, streamState.samples);
-      progRef.current = p;
+    let ticking = false;
 
-      const off = (streamState.L * (1 - p)).toFixed(1);
-      if (waterPRef.current) waterPRef.current.style.strokeDashoffset = off;
-      if (glowPRef.current) glowPRef.current.style.strokeDashoffset = off;
-      if (flowMaskRef.current) flowMaskRef.current.style.strokeDashoffset = off;
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        rafIdRef.current = requestAnimationFrame(() => {
+          const sy = window.scrollY;
+          const docH = document.documentElement.scrollHeight - window.innerHeight;
+          const progress = docH > 0 ? Math.min(1, Math.max(0.12, (sy + window.innerHeight * 0.7) / docH)) : 1;
 
-      const stages = stagesRef.current;
-      for (let i = 0; i < stages.length; i++) {
-        if (streamState.stageOff[i]) {
-          const top = streamState.stageOff[i][0] - sy;
-          const h = streamState.stageOff[i][1];
-          stages[i].classList.toggle('lit', top < vh * 0.74 && top + h > 60);
-        }
+          if (waterFillPathRef.current) {
+            const totalLen = totalWaterLenRef.current;
+            const offset = totalLen * (1 - progress);
+            waterFillPathRef.current.style.strokeDashoffset = `${offset}`;
+          }
+          ticking = false;
+        });
       }
+    };
 
-      const isMobile = streamState.W > 0 && streamState.W < 640;
-      if (isReduced || p <= 0 || isMobile) return;
+    window.addEventListener('scroll', onScroll, { passive: true });
+    // Initial run
+    onScroll();
 
-      const base = now * 4e-5;
-      const dropEls = dropsRef.current;
-      const nd = dropEls.length;
-      for (let i = 0; i < nd; i++) {
-        const dropEl = dropEls[i];
-        if (!dropEl) continue;
-        const phase = (base + i / nd) % 1;
-        const u = phase * p;
-        const k = (u * SN) | 0;
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
+    };
+  }, [isReduced, network]);
 
-        if (streamState.samples) {
-          dropEl.setAttribute('cx', streamState.samples[k * 2].toFixed(1));
-          dropEl.setAttribute('cy', streamState.samples[k * 2 + 1].toFixed(1));
-          dropEl.setAttribute('opacity', (0.28 + 0.62 * Math.sin(phase * Math.PI) ** 2).toFixed(2));
-        }
-      }
-    },
-    [streamState, isReduced]
-  );
+  if (!network || !network.waterPath) {
+    return null;
+  }
 
-  useScrollTick(tickCallback);
-
-  const isMobile = streamState.W > 0 && streamState.W < 640;
-
+  const totalLen = network.totalWaterLength || 1500;
 
   return (
-    <svg
-      id="stream"
+    <div
+      id="water-stream-fullpage"
       aria-hidden="true"
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox={`0 0 ${streamState.W || 1} ${streamState.H || 1}`}
-      width={streamState.W}
-      height={streamState.H}
-      preserveAspectRatio="none"
+      className={`absolute inset-0 pointer-events-none z-[4] overflow-hidden ${className}`}
       style={{
-        overflow: 'visible',
-        width: streamState.W ? `${streamState.W}px` : '100%',
-        height: streamState.H ? `${streamState.H}px` : '100%',
+        width: '100%',
+        height: `${network.height}px`,
       }}
     >
-      <defs>
-        <mask
-          id="flowReveal"
-          maskUnits="userSpaceOnUse"
-          x="0"
-          y="0"
-          width={streamState.W || 1}
-          height={streamState.H || 1}
-          style={{ maskType: 'luminance' }}
-        >
+      <svg
+        width={network.width}
+        height={network.height}
+        viewBox={`0 0 ${network.width} ${network.height}`}
+        className="w-full h-full overflow-visible"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          {/* Main Active Water Fluid Gradient (High contrast & hardware accelerated) */}
+          <linearGradient id="streamFluidGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#72E4FF" stopOpacity="1" />
+            <stop offset="40%" stopColor="#18BFF2" stopOpacity="0.95" />
+            <stop offset="80%" stopColor="#087EA8" stopOpacity="0.9" />
+            <stop offset="100%" stopColor="#18BFF2" stopOpacity="0.95" />
+          </linearGradient>
+        </defs>
+
+        {/* 1. LAYER 1: Metallic Pipe Housing (12px Dark Steel) */}
+        <path
+          d={network.waterPath}
+          stroke="#061B21"
+          strokeWidth="12"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          opacity="0.95"
+        />
+        <path
+          d={network.waterPath}
+          stroke="#0C2B36"
+          strokeWidth="8.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          opacity="0.85"
+        />
+
+        {/* 2. LAYER 2: Physical Water Stream (Fills dynamically with zero lag) */}
+        <path
+          ref={waterFillPathRef}
+          d={network.waterPath}
+          stroke="url(#streamFluidGrad)"
+          strokeWidth="5.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{
+            strokeDasharray: isReduced ? 'none' : `${totalLen}`,
+            strokeDashoffset: isReduced ? '0' : `${totalLen * 0.85}`,
+            willChange: 'stroke-dashoffset',
+          }}
+          opacity="0.95"
+        />
+
+        {/* 3. LAYER 3: GPU-Accelerated Moving Fluid Highlight (Silky Smooth CSS Keyframes, No Expensive Filters) */}
+        {!isReduced && (
           <path
-            ref={flowMaskRef}
-            id="flowMask"
-            fill="none"
-            stroke="white"
-            strokeWidth={isMobile ? '10' : '14'}
+            d={network.waterPath}
+            stroke="#CAF0F8"
+            strokeWidth="2"
             strokeLinecap="round"
-            d={streamState.d}
-            style={{ strokeDasharray: `${streamState.L} ${streamState.L}` }}
+            strokeLinejoin="round"
+            strokeDasharray="36 140"
+            className="water-moving-highlight"
+            style={{ willChange: 'stroke-dashoffset' }}
+            opacity="0.95"
           />
-        </mask>
-      </defs>
-      <path id="pipe" d={streamState.d} fill="none" stroke="#7C99BA" strokeWidth={isMobile ? '6' : '9'} strokeLinecap="round" opacity=".22" />
-      <path
-        ref={glowPRef}
-        id="wglow"
-        d={streamState.d}
-        fill="none"
-        stroke="#3FA9F0"
-        strokeWidth={isMobile ? '6' : '9'}
-        strokeLinecap="round"
-        opacity=".25"
-        style={{ strokeDasharray: `${streamState.L} ${streamState.L}` }}
-      />
-      <path
-        ref={waterPRef}
-        id="water"
-        d={streamState.d}
-        fill="none"
-        stroke="#3FA9F0"
-        strokeWidth={isMobile ? '2.4' : '3.2'}
-        strokeLinecap="round"
-        opacity=".85"
-        style={{ strokeDasharray: `${streamState.L} ${streamState.L}` }}
-      />
-      <path
-        id="current"
-        d={streamState.d}
-        fill="none"
-        stroke="#8FD3FF"
-        strokeWidth={isMobile ? '2.6' : '3.4'}
-        strokeLinecap="round"
-        opacity="1"
-        mask="url(#flowReveal)"
-      />
-      <g id="drops">
-        {Array.from({ length: NDROPS }).map((_, i) => (
-          <circle
-            key={i}
-            ref={(el) => {
-              if (el) dropsRef.current[i] = el;
-            }}
-            r={isMobile ? '2.6' : '3.2'}
-            fill="#8FD3FF"
-            opacity="0"
+        )}
+
+        {/* 4. LAYER 4: Digital Telemetry Signal (Smooth CSS dash animation) */}
+        {network.dataPath && (
+          <path
+            d={network.dataPath}
+            stroke="#72E4FF"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeDasharray="4 8"
+            className="sig"
+            style={{ willChange: 'stroke-dashoffset' }}
+            opacity="0.65"
           />
-        ))}
-      </g>
-      <g id="joints">
-        {streamState.joints.map(([x, y], i) => (
-          <circle
-            key={i}
-            cx={x.toFixed(1)}
-            cy={y.toFixed(1)}
-            r={isMobile ? '4' : '5'}
-            fill="#04121E"
-            stroke="#3FA9F0"
-            strokeWidth={isMobile ? '1.4' : '1.6'}
-            opacity=".8"
-          />
-        ))}
-      </g>
-    </svg>
+        )}
+      </svg>
+
+      {/* 5. Static Lightweight Stream Nodes */}
+      {network.nodes.map((node) => (
+        <StreamNode key={node.id} node={node} />
+      ))}
+    </div>
   );
 };

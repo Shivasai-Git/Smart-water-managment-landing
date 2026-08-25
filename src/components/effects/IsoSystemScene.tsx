@@ -6,11 +6,46 @@ export const IsoSystemScene: React.FC = () => {
   const svgHtml = useMemo(() => buildIsoSvgContent(), []);
   const wrapRef = useRef<HTMLDivElement | null>(null);
 
+  const isVisibleRef = useRef(false);
   const shownRef = useRef(false);
   const fillRef = useRef(0);
   const lastRef = useRef(-1);
   const wTopRef = useRef(0);
   const wHRef = useRef(1);
+
+  // Cached DOM elements for 60fps performance without getElementById queries per frame
+  const elementsRef = useRef<{
+    wR: HTMLElement | null;
+    wR2: HTMLElement | null;
+    wS: HTMLElement | null;
+    wRip: HTMLElement | null;
+    gauge: HTMLElement | null;
+    gTxt: HTMLElement | null;
+    read: HTMLElement | null;
+    mobilePct: HTMLElement | null;
+  }>({
+    wR: null,
+    wR2: null,
+    wS: null,
+    wRip: null,
+    gauge: null,
+    gTxt: null,
+    read: null,
+    mobilePct: null,
+  });
+
+  const cacheElements = useCallback(() => {
+    elementsRef.current = {
+      wR: document.getElementById('wRect'),
+      wR2: document.getElementById('wRect2'),
+      wS: document.getElementById('wSurf'),
+      wRip: document.getElementById('wRipple'),
+      gauge: document.getElementById('gauge'),
+      gTxt: document.getElementById('gaugeTxt'),
+      read: document.getElementById('fillRead'),
+      mobilePct: document.getElementById('mobileTankPct'),
+    };
+  }, []);
 
   const measure = useCallback(() => {
     if (!wrapRef.current) return;
@@ -30,25 +65,40 @@ export const IsoSystemScene: React.FC = () => {
   useEffect(() => {
     fitIsoView();
     measure();
+    cacheElements();
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisibleRef.current = entry.isIntersecting;
+      },
+      { rootMargin: '100px 0px 100px 0px', threshold: 0 }
+    );
+
+    if (wrapRef.current) {
+      observer.observe(wrapRef.current);
+    }
 
     const handleResize = () => {
       setTimeout(() => {
         fitIsoView();
         measure();
+        cacheElements();
       }, 160);
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [fitIsoView, measure]);
+    window.addEventListener('resize', handleResize, { passive: true });
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [fitIsoView, measure, cacheElements]);
 
   const updateFill = useCallback(() => {
-    if (!wrapRef.current) return;
+    // Completely idle when offscreen (e.g. at the bottom of the page)
+    if (!isVisibleRef.current || !wrapRef.current) return;
 
     const top = wTopRef.current - window.scrollY;
-    const vh = window.visualViewport?.height || window.innerHeight;
-
-    if (top > vh * 1.6 || top < -vh * 1.6) return;
+    const vh = window.innerHeight;
 
     if (top < vh * 0.9 && !shownRef.current) {
       shownRef.current = true;
@@ -59,7 +109,7 @@ export const IsoSystemScene: React.FC = () => {
         setTimeout(() => {
           b.setAttribute('y', String(520 + 170 - h));
           b.setAttribute('height', String(h));
-        }, 1000 + i * 130);
+        }, 800 + i * 120);
       });
     }
 
@@ -67,23 +117,14 @@ export const IsoSystemScene: React.FC = () => {
     const fill = Math.max(0, Math.min(1, (vh * 0.88 - top) / travel));
     fillRef.current = fill;
 
-    if (Math.abs(fill - lastRef.current) < 0.002) return;
+    if (Math.abs(fill - lastRef.current) < 0.004) return;
     lastRef.current = fill;
-
 
     const botY = 420 + (2.3 + 2.3) * 15 - 7.5 * 30 - 6;
     const topY = 420 + (2.3 + 2.3) * 15 - 11.3 * 30 + 11;
-
     const y = botY - fill * (botY - topY);
 
-    const wR = document.getElementById('wRect');
-    const wR2 = document.getElementById('wRect2');
-    const wS = document.getElementById('wSurf');
-    const wRip = document.getElementById('wRipple');
-    const gauge = document.getElementById('gauge');
-    const gTxt = document.getElementById('gaugeTxt');
-    const read = document.getElementById('fillRead');
-    const mobilePct = document.getElementById('mobileTankPct');
+    const { wR, wR2, wS, wRip, gauge, gTxt, read, mobilePct } = elementsRef.current;
 
     if (wR) {
       wR.setAttribute('y', y.toFixed(1));
@@ -116,7 +157,7 @@ export const IsoSystemScene: React.FC = () => {
   useScrollTick(updateFill);
 
   return (
-    <div id="isoWrap" ref={wrapRef} className="mt-16 md:mt-24">
+    <div id="isoWrap" ref={wrapRef} className="mt-8 md:mt-12">
       <div id="tankInlet" style={{ position: 'absolute', left: '46.4%', top: '18.3%', width: '1px', height: '1px' }} />
       <div
         id="mobileTankBadge"

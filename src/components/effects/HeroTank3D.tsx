@@ -5,243 +5,240 @@ import { useReducedMotion } from '../../hooks/useReducedMotion';
 
 interface HeroTankSceneProps {
   level: number;
+  isVisible: boolean;
 }
 
-const HeroTankScene: React.FC<HeroTankSceneProps> = ({ level }) => {
+const HeroTankScene: React.FC<HeroTankSceneProps> = ({ level, isVisible }) => {
   const isReduced = useReducedMotion();
-  const { camera, size } = useThree();
+  const { size } = useThree();
 
   const rigRef = useRef<THREE.Group>(null!);
   const waterMeshRef = useRef<THREE.Mesh>(null!);
   const surfMeshRef = useRef<THREE.Mesh>(null!);
-  const surfGeoRef = useRef<THREE.CircleGeometry>(null!);
   const puckRef = useRef<THREE.Group>(null!);
   const ledMatRef = useRef<THREE.MeshStandardMaterial>(null!);
-  const particlesRef = useRef<THREE.Points>(null!);
-  const ringsRef = useRef<THREE.Mesh[]>([]);
 
-  const compact = size.width < 640;
-  const particleCount = compact ? 16 : 80;
-
-  const surfGeo = useMemo(() => new THREE.CircleGeometry(2.34, compact ? 24 : 56), [compact]);
-  const basePos = useMemo(() => surfGeo.attributes.position.array.slice(), [surfGeo]);
-
-  const [particleGeo, particleSpeeds] = useMemo(() => {
-    const geo = new THREE.BufferGeometry();
-    const pos = new Float32Array(particleCount * 3);
-    const spd: number[] = [];
-    for (let i = 0; i < particleCount; i++) {
-      const a = Math.random() * Math.PI * 2;
-      const rad = 3.2 + Math.random() * 3.4;
-      pos[i * 3] = Math.cos(a) * rad;
-      pos[i * 3 + 1] = Math.random() * 12 - 5;
-      pos[i * 3 + 2] = Math.sin(a) * rad;
-      spd.push(0.008 + Math.random() * 0.022);
-    }
-    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    return [geo, spd];
-  }, [particleCount]);
+  const compact = size.width < 768;
+  const surfGeo = useMemo(() => new THREE.CircleGeometry(2.38, compact ? 24 : 48), [compact]);
 
   const mouseRef = useRef({ tx: 0, ty: 0, mx: 0, my: 0 });
 
   useEffect(() => {
     if (compact) return;
     const handleMouseMove = (e: MouseEvent) => {
-      mouseRef.current.tx = e.clientX / window.innerWidth - 0.5;
-      mouseRef.current.ty = e.clientY / window.innerHeight - 0.5;
+      mouseRef.current.tx = (e.clientX / window.innerWidth - 0.5) * 0.4;
+      mouseRef.current.ty = (e.clientY / window.innerHeight - 0.5) * 0.4;
     };
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, [compact]);
 
   useFrame((state) => {
-    const sy = window.scrollY;
-    const heroH = document.getElementById('top')?.offsetHeight || window.innerHeight;
-    // When hero is scrolled out of view, completely stop frame calculations
-    if (sy > heroH + 100) return;
+    if (!isVisible) return;
 
     const t = state.clock.getElapsedTime();
     const mouse = mouseRef.current;
 
-    const targetH = 0.5 + (level / 100) * 4.2;
+    // Smooth level animation (target height based on percentage 0..100)
+    const targetH = 0.6 + (level / 100) * 4.4;
     if (waterMeshRef.current) {
-      waterMeshRef.current.scale.y += (targetH - waterMeshRef.current.scale.y) * 0.04;
+      waterMeshRef.current.scale.y += (targetH - waterMeshRef.current.scale.y) * 0.05;
       waterMeshRef.current.position.y = -2.7 + waterMeshRef.current.scale.y / 2;
 
       if (surfMeshRef.current) {
         const targetSurfY = waterMeshRef.current.position.y + waterMeshRef.current.scale.y / 2;
-        surfMeshRef.current.position.y += (targetSurfY - surfMeshRef.current.position.y) * 0.04;
-      }
-    }
-
-    // Skip heavy vertex wave calculation on mobile
-    if (!compact && surfGeoRef.current) {
-      const p = surfGeoRef.current.attributes.position.array as Float32Array;
-      for (let i = 0; i < p.length; i += 3) {
-        const x = basePos[i];
-        const z = basePos[i + 1];
-        p[i + 2] = Math.sin(x * 1.5 + t * 1.7) * 0.07 + Math.cos(z * 1.6 + t * 1.2) * 0.07;
-      }
-      surfGeoRef.current.attributes.position.needsUpdate = true;
-    }
-
-    if (puckRef.current) {
-      puckRef.current.position.y = 3.05 + Math.sin(t * 1.5) * 0.06;
-    }
-    if (ledMatRef.current) {
-      ledMatRef.current.emissiveIntensity = 1.4 + Math.sin(t * 3.4) * 1.1;
-    }
-
-    if (!compact) {
-      ringsRef.current.forEach((r, i) => {
-        if (r) {
-          r.rotation.z += 0.0022 * (i + 1);
-          r.position.y = -0.4 + i * 0.5 + Math.sin(t * 0.7 + i) * 0.12;
+        surfMeshRef.current.position.y += (targetSurfY - surfMeshRef.current.position.y) * 0.05;
+        if (!isReduced) {
+          surfMeshRef.current.rotation.z = Math.sin(t * 1.2) * 0.02;
         }
-      });
-    }
-
-    if (particlesRef.current) {
-      const a = particleGeo.attributes.position.array as Float32Array;
-      for (let i = 0; i < particleCount; i++) {
-        a[i * 3 + 1] -= particleSpeeds[i];
-        if (a[i * 3 + 1] < -5) a[i * 3 + 1] = 7;
       }
-      particleGeo.attributes.position.needsUpdate = true;
     }
 
+    // Ultrasonic sensor pulse
+    if (ledMatRef.current) {
+      ledMatRef.current.emissiveIntensity = 1.6 + Math.sin(t * 3.0) * 0.8;
+    }
+
+    // Subtle gentle camera parallax
     if (!isReduced && !compact && rigRef.current) {
-      mouse.mx += (mouse.tx - mouse.mx) * 0.045;
-      mouse.my += (mouse.ty - mouse.my) * 0.045;
-      rigRef.current.rotation.y = t * 0.13 + mouse.mx * 0.5;
-      rigRef.current.rotation.x = 0.13 + mouse.my * 0.18;
-      camera.position.x = mouse.mx * 1.1;
-      camera.lookAt(0, 0.4, 0);
+      mouse.mx += (mouse.tx - mouse.mx) * 0.04;
+      mouse.my += (mouse.ty - mouse.my) * 0.04;
+      rigRef.current.rotation.y = 0.15 + mouse.mx * 0.35;
+      rigRef.current.rotation.x = 0.12 + mouse.my * 0.15;
+      state.camera.position.x = mouse.mx * 0.8;
+      state.camera.lookAt(0, 0.2, 0);
     }
   });
 
   return (
     <>
-      <ambientLight color={0x8fa8cc} intensity={0.75} />
-      <pointLight position={[5, 7, 6]} color={0x3fa9f0} intensity={2.2} distance={40} />
-      <pointLight position={[-7, -2, 4]} color={0xffa03c} intensity={1.1} distance={34} />
-      <directionalLight position={[-4, 5, -6]} color={0xe4effa} intensity={0.55} />
+      {/* Precision Industrial Lighting & Local Backlight */}
+      <ambientLight color={0xa0c4e8} intensity={0.9} />
+      
+      {/* Cyan Key Light */}
+      <pointLight position={[6, 8, 7]} color={0x18bff2} intensity={3.2} distance={30} />
+      
+      {/* Soft Teal Fill Light */}
+      <pointLight position={[-6, -1, 5]} color={0x087ea8} intensity={2.0} distance={25} />
+      
+      {/* Crisp Rim Light behind tank for separation */}
+      <pointLight position={[0, 3, -6]} color={0x72e4ff} intensity={3.5} distance={20} />
+      
+      {/* Overhead Directional Highlight */}
+      <directionalLight position={[-2, 6, -3]} color={0xe4effa} intensity={1.2} />
 
-      <group ref={rigRef} rotation={[0.13, 0, 0]}>
-        <mesh>
-          <cylinderGeometry args={[2.5, 2.2, 5.4, compact ? 28 : 56, 1, true]} />
-          <meshStandardMaterial
-            color={0x9fb4d4}
-            metalness={0.1}
-            roughness={0.35}
+      <group ref={rigRef} rotation={[0.12, 0.15, 0]}>
+        {/* Soft Radial Backing Disc for Strong Figure-Ground Separation */}
+        <mesh position={[0, 0.2, -3.2]}>
+          <planeGeometry args={[11, 11]} />
+          <meshBasicMaterial
+            color={0x072836}
             transparent
-            opacity={0.13}
+            opacity={0.38}
             side={THREE.DoubleSide}
           />
         </mesh>
 
-        {[0, 1, 2, 3].map((i) => (
-          <mesh key={i} rotation={[Math.PI / 2, 0, 0]} position={[0, 1.9 - i * 1.25, 0]}>
-            <torusGeometry args={[2.42 - i * 0.04, 0.035, 8, compact ? 28 : 56]} />
-            <meshStandardMaterial color={0x7c99ba} roughness={0.6} transparent opacity={0.35} />
+        {/* Outer Cylinder: Crisp Translucent Industrial Polycarbonate */}
+        <mesh>
+          <cylinderGeometry args={[2.55, 2.35, 5.6, compact ? 28 : 48, 1, true]} />
+          <meshStandardMaterial
+            color={0x658fae}
+            metalness={0.2}
+            roughness={0.2}
+            transparent
+            opacity={0.32}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+
+        {/* Structural Reinforcement Bands */}
+        {[0, 1, 2, 3, 4].map((i) => (
+          <mesh key={i} rotation={[Math.PI / 2, 0, 0]} position={[0, 2.3 - i * 1.15, 0]}>
+            <torusGeometry args={[2.53 - i * 0.04, 0.042, 8, compact ? 24 : 48]} />
+            <meshStandardMaterial
+              color={i === 0 || i === 4 ? 0x3fa9f0 : 0x184763}
+              roughness={0.3}
+              metalness={0.65}
+              emissive={i === 0 ? 0x087ea8 : 0x000000}
+              emissiveIntensity={0.5}
+            />
           </mesh>
         ))}
 
+        {/* Internal Active Water Column (High Visibility 75%+ opacity) */}
         <mesh ref={waterMeshRef} position={[0, -2.7 + 0.5, 0]}>
-          <cylinderGeometry args={[2.34, 2.12, 1, compact ? 24 : 48]} />
-          <meshStandardMaterial color={0x3fa9f0} transparent opacity={0.42} roughness={0.1} metalness={0.25} />
+          <cylinderGeometry args={[2.42, 2.22, 1, compact ? 24 : 40]} />
+          <meshStandardMaterial
+            color={0x18bff2}
+            transparent
+            opacity={0.78}
+            roughness={0.08}
+            metalness={0.35}
+          />
         </mesh>
 
+        {/* Internal Water Surface Meniscus */}
         <mesh ref={surfMeshRef} rotation={[-Math.PI / 2, 0, 0]}>
-          <primitive object={surfGeo} ref={surfGeoRef} attach="geometry" />
+          <primitive object={surfGeo} attach="geometry" />
           <meshStandardMaterial
-            color={0x8fd3ff}
+            color={0x72e4ff}
             transparent
-            opacity={0.58}
-            roughness={0.05}
-            metalness={0.5}
+            opacity={0.88}
+            roughness={0.04}
+            metalness={0.6}
             side={THREE.DoubleSide}
           />
         </mesh>
 
-        <group ref={puckRef} position={[1.55, 3.05, 0]}>
+        {/* Top Ultrasonic Sensor Node */}
+        <group ref={puckRef} position={[1.4, 3.15, 0]}>
+          {/* Puck Housing */}
           <mesh>
-            <cylinderGeometry args={[0.46, 0.5, 0.3, compact ? 16 : 32]} />
-            <meshStandardMaterial color={0x3fa9f0} roughness={0.28} metalness={0.45} />
+            <cylinderGeometry args={[0.42, 0.48, 0.35, compact ? 16 : 28]} />
+            <meshStandardMaterial color={0x0f2b3c} roughness={0.3} metalness={0.8} />
           </mesh>
-          <mesh position={[0, 0.18, 0]}>
+          {/* Glowing Status LED */}
+          <mesh position={[0, 0.2, 0]}>
             <sphereGeometry args={[0.09, 12, 12]} />
             <meshStandardMaterial
               ref={ledMatRef}
-              color={0xffffff}
-              emissive={0x3fa9f0}
-              emissiveIntensity={2}
+              color={0x72e4ff}
+              emissive={0x18bff2}
+              emissiveIntensity={2.2}
+            />
+          </mesh>
+          {/* Downward Sensing Acoustic Cone */}
+          <mesh position={[0, -1.3, 0]}>
+            <coneGeometry args={[0.65, 2.5, compact ? 12 : 24, 1, true]} />
+            <meshBasicMaterial
+              color={0x18bff2}
+              transparent
+              opacity={0.12}
+              side={THREE.DoubleSide}
             />
           </mesh>
         </group>
 
-        <mesh position={[1.55, 1.9, 0]}>
-          <coneGeometry args={[0.62, 2.4, compact ? 16 : 28, 1, true]} />
-          <meshBasicMaterial color={0x3fa9f0} transparent opacity={0.07} side={THREE.DoubleSide} />
-        </mesh>
-
-        {!compact &&
-          [0, 1, 2].map((i) => (
-            <mesh
-              key={i}
-              ref={(el) => {
-                if (el) ringsRef.current[i] = el;
-              }}
-              rotation={[Math.PI / 2 + (i - 1) * 0.22, 0, 0]}
-              position={[0, -0.4 + i * 0.5, 0]}
-            >
-              <torusGeometry args={[3.3 + i * 0.5, 0.008, 6, 64]} />
-              <meshBasicMaterial
-                color={i === 1 ? 0xffa03c : 0x3fa9f0}
-                transparent
-                opacity={0.3 - i * 0.07}
-              />
-            </mesh>
-          ))}
+        {/* Inlet Pipe Entry Spout (Right side) */}
+        <group position={[2.4, 2.2, 0]} rotation={[0, 0, -Math.PI / 2]}>
+          <mesh>
+            <cylinderGeometry args={[0.22, 0.22, 1.0, 16]} />
+            <meshStandardMaterial color={0x12364a} metalness={0.7} roughness={0.3} />
+          </mesh>
+          <mesh position={[0, -0.4, 0]}>
+            <torusGeometry args={[0.26, 0.05, 8, 16]} />
+            <meshStandardMaterial color={0x18bff2} roughness={0.2} metalness={0.5} />
+          </mesh>
+        </group>
       </group>
-
-      <points ref={particlesRef} geometry={particleGeo}>
-        <pointsMaterial color={0x3fa9f0} size={compact ? 0.045 : 0.055} transparent opacity={0.55} />
-      </points>
     </>
   );
 };
 
 export const HeroTank3D: React.FC<{ level: number }> = ({ level }) => {
-  const [mounted, setMounted] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [mounted] = useState(() => typeof window !== 'undefined');
+  const [isMobile] = useState(() => (typeof window !== 'undefined' ? window.innerWidth < 768 : false));
+  const [isVisible, setIsVisible] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setMounted(true);
-    setIsMobile(window.innerWidth < 640);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+      },
+      { threshold: 0.05 }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => observer.disconnect();
   }, []);
 
   return (
     <div
       id="scene"
-      className={`absolute inset-y-0 right-0 w-full lg:w-[56%] transition-opacity duration-1000 ${
+      ref={containerRef}
+      className={`absolute inset-y-0 right-0 w-full lg:w-[56%] transition-opacity duration-700 pointer-events-none ${
         mounted ? 'opacity-100' : 'opacity-0'
       }`}
-      style={{ zIndex: 0 }}
+      style={{ zIndex: 1 }}
     >
       <Canvas
-        camera={{ position: [0, 1.6, 12], fov: 38, near: 0.1, far: 100 }}
+        camera={{ position: [0, 1.2, 11], fov: 36, near: 0.1, far: 40 }}
         gl={{
           antialias: !isMobile,
           alpha: true,
-          powerPreference: isMobile ? 'default' : 'high-performance',
+          powerPreference: 'high-performance',
           preserveDrawingBuffer: false,
         }}
-        dpr={isMobile ? 1 : [1, 1.5]}
+        dpr={isMobile ? 1 : [1, 1.25]}
+        frameloop={isVisible ? 'always' : 'demand'}
       >
-        <HeroTankScene level={level} />
+        <HeroTankScene level={level} isVisible={isVisible} />
       </Canvas>
     </div>
   );
 };
-

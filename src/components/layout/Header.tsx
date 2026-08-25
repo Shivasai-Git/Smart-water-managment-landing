@@ -6,39 +6,41 @@ export const Header: React.FC = () => {
   const { isOpen, toggle, close } = useMobileNav();
 
   return (
-    <header className="fixed top-0 inset-x-0 z-50 glass border-b border-white/5">
+    <header className="fixed top-0 inset-x-0 z-50 bg-[#031014]/90 backdrop-blur-md border-b border-white/8">
       <div className="nav-shell max-w-shell mx-auto px-6 h-16 flex items-center justify-between gap-3">
         <a href="#top" className="flex items-center gap-2.5">
           <span className="relative w-2.5 h-2.5 rounded-full bg-aqua">
-            <span className="absolute inset-0 rounded-full bg-aqua animate-ping opacity-60"></span>
+            <span className="absolute inset-0 rounded-full bg-aqua animate-ping opacity-60" />
           </span>
-          <span className="brand-label font-display font-semibold tracking-tight text-[15px] whitespace-nowrap">
+          <span className="brand-label font-display font-semibold tracking-tight text-[15px] whitespace-nowrap text-mist">
             Smart Water Flow
           </span>
         </a>
+
         <nav className="hidden lg:flex items-center gap-7 font-mono text-[11px] tracking-[.14em] uppercase text-steel">
-          <a href="#cost" className="hover:text-mist transition-colors">
-            The cost
+          <a href="#problem" className="hover:text-mist transition-colors">
+            The Problem
           </a>
-          <a href="#system" className="hover:text-mist transition-colors">
-            The system
+          <a href="#how-it-works" className="hover:text-mist transition-colors">
+            How It Works
           </a>
-          <a href="#loop" className="hover:text-mist transition-colors">
-            How it flows
+          <a href="#capabilities" className="hover:text-mist transition-colors">
+            Capabilities
           </a>
-          <a href="#tracks" className="hover:text-mist transition-colors">
-            Two tracks
+          <a href="#dashboard" className="hover:text-mist transition-colors">
+            Dashboard
           </a>
-          <a href="#roadmap" className="hover:text-mist transition-colors">
-            Roadmap
+          <a href="#audience" className="hover:text-mist transition-colors">
+            Who It Is For
           </a>
         </nav>
+
         <div className="flex items-center gap-2">
           <a
-            href="#close"
-            className="hidden sm:inline-flex font-mono text-[11px] tracking-[.12em] uppercase px-4 py-2 rounded-full bg-aqua text-ink font-medium hover:bg-mist transition-colors"
+            href="#capabilities"
+            className="hidden sm:inline-flex font-mono text-[11px] tracking-[.12em] uppercase px-4 py-2 rounded-full bg-aqua text-ink font-medium hover:bg-mist transition-colors shadow-[0_0_12px_rgba(24,191,242,0.3)]"
           >
-            See the system
+            Explore System
           </a>
           <button
             id="menuBtn"
@@ -49,8 +51,8 @@ export const Header: React.FC = () => {
             aria-label={isOpen ? 'Close navigation' : 'Open navigation'}
             onClick={toggle}
           >
-            <span className="menu-line block w-4 h-px bg-mist"></span>
-            <span className="menu-line block w-4 h-px bg-mist"></span>
+            <span className="menu-line block w-4 h-px bg-mist" />
+            <span className="menu-line block w-4 h-px bg-mist" />
           </button>
         </div>
       </div>
