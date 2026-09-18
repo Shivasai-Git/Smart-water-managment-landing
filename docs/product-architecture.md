@@ -29,7 +29,7 @@ src/
 docs/product-architecture.md
 ```
 
-The current single-file dashboard is intentionally compact for a pitch prototype. Before implementation grows, split into `features/overview`, `features/quality`, `features/incidents`, `features/devices`, and `features/control`, keeping each feature’s types, API adapter and UI together.
+The current single-file dashboard is intentionally compact for a pitch prototype. Before implementation grows, split into `features/overview`, `features/quality`, `features/incidents`, `features/devices`, and `features/control`, keeping each feature's types, API adapter and UI together.
 
 ## Core data model
 
@@ -44,7 +44,7 @@ Required records: `Tenant`, `User`, `Site`, `Zone`, `Asset`, `Device`, `Telemetr
 
 ## Simulation strategy
 
-The “Run incident demo” control advances a deterministic state machine: normal → leak → contained. The leak step drives Zone B to 78.6 L/min, creates an AI insight and high-priority alert. The contained state closes the simulated valve and shows estimated loss avoided.
+The "Run incident demo" control advances a deterministic state machine: normal → leak → contained. The leak step drives Zone B to 78.6 L/min, creates an AI insight and high-priority alert. The contained state closes the simulated valve and shows estimated loss avoided.
 
 Production telemetry must never be mixed with demo fixtures. Use an explicit `dataSource: 'simulated' | 'live'` field and render the provenance badge throughout the UI.
 
