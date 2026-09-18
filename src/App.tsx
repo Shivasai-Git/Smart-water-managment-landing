@@ -1,47 +1,91 @@
-import React from 'react';
-import { IndustrialBackground } from './components/effects/IndustrialBackground';
-import { WaterStream } from './components/effects/WaterStream';
-import { Header } from './components/layout/Header';
-import { Footer } from './components/layout/Footer';
-import { useRevealObserver } from './hooks/useRevealObserver';
+// src/App.tsx
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { AuthProvider, useAuth } from './state/auth';
+import { ScenarioProvider } from './state/scenario';
 
-import { HeroSection } from './components/sections/HeroSection';
-import { ProblemSection } from './components/sections/ProblemSection';
-import { HowItWorksSection } from './components/sections/HowItWorksSection';
-import { CapabilitiesSection } from './components/sections/CapabilitiesSection';
-import { ConnectedDashboardSection } from './components/sections/ConnectedDashboardSection';
-import { AudienceSection } from './components/sections/AudienceSection';
-import { CloseSection } from './components/sections/CloseSection';
+import MarketingPage from './features/marketing/MarketingPage';
+import LoginPage from './features/auth/LoginPage';
+import AppShell from './features/app-shell/AppShell';
+import AdminShell from './features/app-shell/AdminShell';
 
-export const App: React.FC = () => {
-  useRevealObserver();
+import DashboardPage from './features/dashboard/DashboardPage';
+import SectionsPage from './features/sections/SectionsPage';
+import SectionDetailPage from './features/sections/SectionDetailPage';
+import UsagePage from './features/usage/UsagePage';
+import TankPage from './features/tank/TankPage';
+import QualityPage from './features/quality/QualityPage';
+import AlertsPage from './features/alerts/AlertsPage';
+import PumpPage from './features/pump/PumpPage';
+import ValvesPage from './features/valves/ValvesPage';
+import InsightsPage from './features/insights/InsightsPage';
+import ReportsPage from './features/reports/ReportsPage';
+import DevicesPage from './features/devices/DevicesPage';
 
+import AdminOverviewPage from './features/admin/AdminOverviewPage';
+import AdminCustomersPage from './features/admin/AdminCustomersPage';
+import AdminDevicesPage from './features/admin/AdminDevicesPage';
+import AdminAlertsPage from './features/admin/AdminAlertsPage';
+import AdminAuditPage from './features/admin/AdminAuditPage';
+
+function RequireRole({ role, children }: { role: 'customer' | 'admin'; children: React.ReactNode }) {
+  const { role: currentRole, signedIn } = useAuth();
+  if (!signedIn) return <Navigate to="/login" replace />;
+  if (currentRole !== role) return <Navigate to={role === 'admin' ? '/app/dashboard' : '/admin/overview'} replace />;
+  return <>{children}</>;
+}
+
+export default function App() {
   return (
-    <div className="font-body text-mist min-h-screen bg-[#031014] relative selection:bg-aqua selection:text-ink">
-      {/* Engineered Dark Industrial Blueprint Background */}
-      <IndustrialBackground />
+    <BrowserRouter>
+      <AuthProvider>
+        <ScenarioProvider>
+          <Routes>
+            <Route path="/" element={<MarketingPage />} />
+            <Route path="/login" element={<LoginPage />} />
 
-      {/* Full-Page Animated Water Flow Infrastructure Stream */}
-      <WaterStream />
+            <Route
+              path="/app"
+              element={
+                <RequireRole role="customer">
+                  <AppShell />
+                </RequireRole>
+              }
+            >
+              <Route index element={<Navigate to="dashboard" replace />} />
+              <Route path="dashboard" element={<DashboardPage />} />
+              <Route path="sections" element={<SectionsPage />} />
+              <Route path="sections/:sectionId" element={<SectionDetailPage />} />
+              <Route path="usage" element={<UsagePage />} />
+              <Route path="tank" element={<TankPage />} />
+              <Route path="quality" element={<QualityPage />} />
+              <Route path="alerts" element={<AlertsPage />} />
+              <Route path="pump" element={<PumpPage />} />
+              <Route path="valves" element={<ValvesPage />} />
+              <Route path="insights" element={<InsightsPage />} />
+              <Route path="reports" element={<ReportsPage />} />
+              <Route path="devices" element={<DevicesPage />} />
+            </Route>
 
-      {/* Global Navigation Header */}
-      <Header />
+            <Route
+              path="/admin"
+              element={
+                <RequireRole role="admin">
+                  <AdminShell />
+                </RequireRole>
+              }
+            >
+              <Route index element={<Navigate to="overview" replace />} />
+              <Route path="overview" element={<AdminOverviewPage />} />
+              <Route path="customers" element={<AdminCustomersPage />} />
+              <Route path="devices" element={<AdminDevicesPage />} />
+              <Route path="alerts" element={<AdminAlertsPage />} />
+              <Route path="audit" element={<AdminAuditPage />} />
+            </Route>
 
-      {/* 7 Structured Product Sections */}
-      <main className="relative z-10">
-        <HeroSection />
-        <ProblemSection />
-        <HowItWorksSection />
-        <CapabilitiesSection />
-        <ConnectedDashboardSection />
-        <AudienceSection />
-        <CloseSection />
-      </main>
-
-      {/* Footer */}
-      <Footer />
-    </div>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </ScenarioProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
-};
-
-export default App;
+}
