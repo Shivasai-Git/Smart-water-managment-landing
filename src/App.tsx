@@ -1,31 +1,38 @@
 // src/App.tsx
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { useEffect } from 'react';
+import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './state/auth';
-import { ScenarioProvider } from './state/scenario';
 
 import MarketingPage from './features/marketing/MarketingPage';
 import LoginPage from './features/auth/LoginPage';
 import AppShell from './features/app-shell/AppShell';
 import AdminShell from './features/app-shell/AdminShell';
 
-import DashboardPage from './features/dashboard/DashboardPage';
-import SectionsPage from './features/sections/SectionsPage';
-import SectionDetailPage from './features/sections/SectionDetailPage';
-import UsagePage from './features/usage/UsagePage';
-import TankPage from './features/tank/TankPage';
-import QualityPage from './features/quality/QualityPage';
-import AlertsPage from './features/alerts/AlertsPage';
-import PumpPage from './features/pump/PumpPage';
-import ValvesPage from './features/valves/ValvesPage';
+import DashboardScreen from './screens/DashboardScreen';
+import HomeSpatialScreen from './screens/HomeSpatialScreen';
+import UsageScreen from './screens/UsageScreen';
+import TankScreen from './screens/TankScreen';
+import QualityScreen from './screens/QualityScreen';
+import AlertsScreen from './screens/AlertsScreen';
+import PumpValveScreen from './screens/PumpValveScreen';
 import InsightsPage from './features/insights/InsightsPage';
-import ReportsPage from './features/reports/ReportsPage';
+import ReportsScreen from './screens/ReportsScreen';
 import DevicesPage from './features/devices/DevicesPage';
+import SectionDetailPage from './features/sections/SectionDetailPage';
 
 import AdminOverviewPage from './features/admin/AdminOverviewPage';
 import AdminCustomersPage from './features/admin/AdminCustomersPage';
 import AdminDevicesPage from './features/admin/AdminDevicesPage';
 import AdminAlertsPage from './features/admin/AdminAlertsPage';
 import AdminAuditPage from './features/admin/AdminAuditPage';
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
 
 function RequireRole({ role, children }: { role: 'customer' | 'admin'; children: React.ReactNode }) {
   const { role: currentRole, signedIn } = useAuth();
@@ -37,8 +44,8 @@ function RequireRole({ role, children }: { role: 'customer' | 'admin'; children:
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <AuthProvider>
-        <ScenarioProvider>
           <Routes>
             <Route path="/" element={<MarketingPage />} />
             <Route path="/login" element={<LoginPage />} />
@@ -47,23 +54,25 @@ export default function App() {
               path="/app"
               element={
                 <RequireRole role="customer">
-                  <AppShell />
+                  <Outlet />
                 </RequireRole>
               }
             >
               <Route index element={<Navigate to="dashboard" replace />} />
-              <Route path="dashboard" element={<DashboardPage />} />
-              <Route path="sections" element={<SectionsPage />} />
-              <Route path="sections/:sectionId" element={<SectionDetailPage />} />
-              <Route path="usage" element={<UsagePage />} />
-              <Route path="tank" element={<TankPage />} />
-              <Route path="quality" element={<QualityPage />} />
-              <Route path="alerts" element={<AlertsPage />} />
-              <Route path="pump" element={<PumpPage />} />
-              <Route path="valves" element={<ValvesPage />} />
-              <Route path="insights" element={<InsightsPage />} />
-              <Route path="reports" element={<ReportsPage />} />
-              <Route path="devices" element={<DevicesPage />} />
+              <Route element={<AppShell />}>
+                <Route path="dashboard" element={<DashboardScreen />} />
+                <Route path="reports" element={<ReportsScreen />} />
+                <Route path="sections" element={<HomeSpatialScreen />} />
+                <Route path="sections/:sectionId" element={<SectionDetailPage />} />
+                <Route path="usage" element={<UsageScreen />} />
+                <Route path="tank" element={<TankScreen />} />
+                <Route path="quality" element={<QualityScreen />} />
+                <Route path="alerts" element={<AlertsScreen />} />
+                <Route path="pump" element={<PumpValveScreen />} />
+                <Route path="valves" element={<PumpValveScreen />} />
+                <Route path="insights" element={<InsightsPage />} />
+                                <Route path="devices" element={<DevicesPage />} />
+              </Route>
             </Route>
 
             <Route
@@ -84,7 +93,6 @@ export default function App() {
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-        </ScenarioProvider>
       </AuthProvider>
     </BrowserRouter>
   );

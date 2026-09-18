@@ -1,30 +1,29 @@
-// src/features/admin/AdminAuditPage.tsx
 import { auditLog } from '../../data/fixtures/admin';
-import { DataTable } from '../../components/ui/DataTable';
-import { StatusPill } from '../../components/ui/StatusPill';
+import { Card, CardTitle, Jewel, Page, TD, Table } from '../app-shell/m3';
 
 export default function AdminAuditPage() {
   return (
-    <div className="flex flex-col gap-6">
-      <h1 className="font-display text-2xl text-mist">Audit Trail</h1>
-      <section className="rounded-2xl border border-steel/20 bg-ink2 p-5">
-        <DataTable
-          columns={[
-            { key: 'actor', label: 'Actor' },
-            { key: 'action', label: 'Action' },
-            { key: 'target', label: 'Target' },
-            { key: 'timestamp', label: 'Timestamp' },
-            { key: 'result', label: 'Result' },
-          ]}
-          rows={auditLog.map((entry) => ({
-            actor: entry.actor,
-            action: entry.action,
-            target: entry.target,
-            timestamp: new Date(entry.timestamp).toLocaleString(),
-            result: <StatusPill tone={entry.result === 'success' ? 'good' : 'danger'} label={entry.result} />,
-          }))}
-        />
-      </section>
-    </div>
+    <Page
+      eyebrow="Admin Console • Operations"
+      title="Audit Trail"
+      subtitle="Who did what, to which target, and whether it succeeded."
+    >
+      <Card>
+        <CardTitle eyebrow="Immutable log" title={`${auditLog.length} entries`} />
+        <Table head={['Time', 'Actor', 'Action', 'Target', 'Result']}>
+          {auditLog.map((e) => (
+            <tr key={e.id}>
+              <td className={`${TD} text-on-surface-variant whitespace-nowrap`}>{new Date(e.timestamp).toLocaleString()}</td>
+              <td className={`${TD} font-mono`}>{e.actor}</td>
+              <td className={TD}>{e.action}</td>
+              <td className={`${TD} font-mono text-on-surface-variant`}>{e.target}</td>
+              <td className={TD}>
+                <Jewel tone={e.result === 'success' ? 'nominal' : 'critical'}>{e.result}</Jewel>
+              </td>
+            </tr>
+          ))}
+        </Table>
+      </Card>
+    </Page>
   );
 }

@@ -1,35 +1,39 @@
-// src/features/admin/AdminDevicesPage.tsx
 import { devices } from '../../data/fixtures/devices';
-import { DataTable } from '../../components/ui/DataTable';
-import { StatusPill } from '../../components/ui/StatusPill';
 import type { DeviceStatus } from '../../data/types';
+import { Card, CardTitle, Jewel, Metric, Page, TD, Table } from '../app-shell/m3';
 
-const STATUS_TONE: Record<DeviceStatus, 'good' | 'attention' | 'danger'> = {
-  online: 'good',
-  attention: 'attention',
-  offline: 'danger',
-};
+const TONE: Record<DeviceStatus, 'nominal' | 'advisory' | 'critical'> = { online: 'nominal', attention: 'advisory', offline: 'critical' };
 
 export default function AdminDevicesPage() {
+  const count = (s: DeviceStatus) => devices.filter((d) => d.status === s).length;
   return (
-    <div className="flex flex-col gap-6">
-      <h1 className="font-display text-2xl text-mist">Devices</h1>
-      <section className="rounded-2xl border border-steel/20 bg-ink2 p-5">
-        <DataTable
-          columns={[
-            { key: 'id', label: 'Device ID' },
-            { key: 'type', label: 'Type' },
-            { key: 'status', label: 'Status' },
-            { key: 'lastSeen', label: 'Last seen' },
-          ]}
-          rows={devices.map((d) => ({
-            id: d.id,
-            type: d.type,
-            status: <StatusPill tone={STATUS_TONE[d.status]} label={d.status} />,
-            lastSeen: d.lastSeen,
-          }))}
-        />
-      </section>
-    </div>
+    <Page
+      eyebrow="Admin Console • Hardware"
+      title="Devices"
+      subtitle="Every sensor, controller and gateway registered to the fleet."
+    >
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Metric label="Online" value={String(count('online'))} icon="check_circle" note="Reporting normally" />
+        <Metric label="Attention" value={String(count('attention'))} icon="warning" note="Controller degraded" />
+        <Metric label="Offline" value={String(count('offline'))} icon="cloud_off" note="No telemetry" />
+      </div>
+      <Card>
+        <CardTitle eyebrow="Registry" title="All devices" />
+        <Table head={['ID', 'Label', 'Type', 'Firmware', 'Last seen', 'Status']}>
+          {devices.map((d) => (
+            <tr key={d.id}>
+              <td className={`${TD} font-mono`}>{d.id}</td>
+              <td className={TD}>{d.label}</td>
+              <td className={`${TD} text-on-surface-variant`}>{d.type}</td>
+              <td className={`${TD} text-on-surface-variant`}>v{d.firmwareVersion}</td>
+              <td className={`${TD} text-on-surface-variant whitespace-nowrap`}>{d.lastSeen}</td>
+              <td className={TD}>
+                <Jewel tone={TONE[d.status]}>{d.status}</Jewel>
+              </td>
+            </tr>
+          ))}
+        </Table>
+      </Card>
+    </Page>
   );
 }
