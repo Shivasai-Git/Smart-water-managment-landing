@@ -10,6 +10,8 @@ export default {
         steel: '#7C99BA',
         aqua: '#3FA9F0',
         saffron: '#FFA03C',
+        good: '#57C2A0',
+        danger: '#FF6B5B',
       },
       fontFamily: {
         display: ['"Bricolage Grotesque"', 'sans-serif'],
