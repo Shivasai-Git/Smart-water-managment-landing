@@ -125,25 +125,38 @@ the auth context to `role: 'customer', signedIn: true` and navigates to
 
 ## Visual design system
 
-Palette (base is fixed by the report's own brief: dark navy/blue + aqua/cyan;
-the rest is a deliberate choice for this rebuild):
+**Correction after discovery:** the dormant landing page already ships its
+own Tailwind theme (`tailwind.config.js`) — navy `ink`/`ink2`, `aqua` accent,
+`mist`/`steel` text, `saffron` warm accent, Bricolage Grotesque + IBM Plex
+Sans/Mono — already branded "Smart Water Flow" and already close to the
+report's navy/aqua brief. Rather than introduce a second, competing palette
+and a hand-rolled CSS token file, this rebuild **adopts and extends that
+existing theme app-wide** and builds the dashboard with Tailwind utility
+classes (matching the landing page's own approach) instead of the
+`dashboard.css` custom-properties file. This means the landing page needs no
+retheming — it already matches.
+
+Palette — existing tokens kept as-is, two new tokens added for status colors
+the dashboard needs that the landing page didn't:
 
 | Token | Hex | Use |
 |---|---|---|
-| `--bg` | `#0B1E33` | page background (ink-navy) |
-| `--surface` | `#122A44` | panel surface |
-| `--accent` | `#2DD4C8` | primary actions, live/normal status |
-| `--danger` | `#FF6B5B` | alerts/leaks |
-| `--good` | `#57C2A0` | normal/good status (distinct from accent) |
-| `--text` | `#C8D6E5` | primary text on navy |
-| `--text-muted` | `#6E86A0` | secondary text |
+| `ink` | `#04121E` | page background (existing) |
+| `ink2` | `#0A2135` | panel surface (existing) |
+| `aqua` | `#3FA9F0` | primary accent, live/normal status (existing) |
+| `mist` | `#E4EFFA` | primary text on navy (existing) |
+| `steel` | `#7C99BA` | secondary/muted text (existing) |
+| `saffron` | `#FFA03C` | warning/attention tier — e.g. calibration due, connectivity attention (existing) |
+| `good` | `#57C2A0` | normal/good status, distinct from the `aqua` accent (**new**) |
+| `danger` | `#FF6B5B` | critical alerts/leaks, distinct from `saffron` warnings (**new**) |
 
-Type — three families, each with one job:
-- **Fraunces** (serif) — page/section headlines, one or two hero numbers per
-  screen.
-- **IBM Plex Mono** — live sensor readouts only (flow rate, liters, ppm,
-  pressure) — reads like a physical meter's digit display.
-- **IBM Plex Sans** — nav, labels, body copy, buttons, everything else.
+Type — three families, each with one job (existing `fontFamily` theme keys):
+- **`font-display`** (Bricolage Grotesque) — page/section headlines, one or
+  two hero numbers per screen.
+- **`font-mono`** (IBM Plex Mono) — live sensor readouts only (flow rate,
+  liters, ppm, pressure) — reads like a physical meter's digit display.
+- **`font-body`** (IBM Plex Sans) — nav, labels, body copy, buttons,
+  everything else.
 
 Layout:
 - No identical rounded-shadow card grid. Panels are flat surfaces separated
@@ -169,9 +182,9 @@ Principles:
 
 The existing unused landing components (`Header`, `Footer`, `HeroSection`,
 `ProblemSection`, etc., plus the 3D tank visuals) are wired in as the public
-`/` route and re-themed to the new token palette/type system. Content
-structure stays; visual treatment changes to match. `/login` and any
-"open dashboard" CTA on the landing page route into the app.
+`/` route as-is — no retheming needed, since they already use the palette
+this rebuild adopts. `/login` and any "open dashboard" CTA on the landing
+page route into the app.
 
 ## Component/folder structure
 
@@ -179,7 +192,7 @@ structure stays; visual treatment changes to match. `/login` and any
 src/
   app/                    router setup, role-based route guards
   features/
-    marketing/            restyled landing sections
+    marketing/            existing landing sections (unchanged, wired in)
     auth/                 Login/Signup
     dashboard/
     sections/             My Home + section detail
@@ -196,11 +209,15 @@ src/
   components/ui/          Gauge, StatusPill, DataTable, RiserList, MetricReadout
   data/                   types + fixtures
   state/                  auth context, scenario context
-  styles/                 design tokens (tokens.css)
 ```
 
 - New dependency: `react-router-dom`. No chart library — hand-rolled SVG as
   today, to avoid a generic library look.
+- Dashboard/app pages are built with Tailwind utility classes against the
+  extended `ink`/`ink2`/`aqua`/`mist`/`steel`/`saffron`/`good`/`danger`
+  theme in `tailwind.config.js`, matching the landing page's own approach.
+  `src/dashboard.css` (the old indigo-theme custom-properties file) is
+  deleted, not extended.
 - Existing icon helper/paths reused; a few new icons added as needed (gauge,
   house). No commerce-related icons this cycle.
 - `docs/product-architecture.md` updated to reflect residential scope, route
