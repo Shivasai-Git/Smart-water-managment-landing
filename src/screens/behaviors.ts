@@ -269,3 +269,93 @@ export function setupUsage(): Cleanup {
   });
   return done(cleanups);
 }
+
+/* ------------------------------ Landing page ------------------------------ */
+
+interface ZoneInfo {
+  title: string;
+  desc: string;
+  status: string;
+  pressure: string;
+  jitter: string;
+  tds: string;
+  db: string;
+}
+
+const ZONES: Record<string, ZoneInfo> = {
+  kitchen: { title: 'Kitchen & Utility Inflow • Normal', desc: 'Dedicated residential line equipped with pulse flow metering, section motorized shutoff valve, and local telemetry reporting.', status: 'Monitored', pressure: '2.1', jitter: 'Open', tds: 'None', db: 'Online' },
+  bath1: { title: 'Bathroom 1 (Master En-suite) • Normal', desc: 'High-draw domestic supply branch monitored for unexpected continuous night flow and over-duration draw events.', status: 'Monitored', pressure: '1.8', jitter: 'Open', tds: 'None', db: 'Online' },
+  bath2: { title: 'Bathroom 2 (Guest Bath) • Standby', desc: 'Monitored fixture supply branch with automated abnormal flow alert triggers and physical shutoff actuator.', status: 'Standby', pressure: '0.0', jitter: 'Open', tds: 'None', db: 'Online' },
+  bath3: { title: 'Bathroom 3 (Upper Level) • Normal', desc: 'Gravity-fed upper residential branch tracking static line pressure and potential concealed joint leaks.', status: 'Monitored', pressure: '0.9', jitter: 'Open', tds: 'None', db: 'Online' },
+  washing: { title: 'Washing Area & Laundry • Normal', desc: 'Appliance water feed line configured with automatic run-time threshold rules to guard against solenoid failures.', status: 'Monitored', pressure: '0.0', jitter: 'Open', tds: 'None', db: 'Online' },
+  parking: { title: 'Parking & Exterior Wash Point • Standby', desc: 'Isolated exterior outlet with scheduled shutoff windows and pressure monitoring to prevent unauthorized draws.', status: 'Standby', pressure: '0.0', jitter: 'Closed', tds: 'None', db: 'Online' },
+  garden: { title: 'Garden & Drip Irrigation • Scheduled', desc: 'Irrigation feed line integrating timed valve cycles with continuous volume recording to avoid over-watering.', status: 'Scheduled', pressure: '3.4', jitter: 'Active', tds: 'None', db: 'Online' },
+};
+
+interface CycleStep {
+  gravity: number;
+  cistern: number;
+  pressure: string;
+  flow: string;
+  acoustic: string;
+  wave: string;
+}
+
+const CYCLE: CycleStep[] = [
+  { gravity: 78, cistern: 64, pressure: '2.4', flow: '4.6', acoustic: 'Connected', wave: 'M0,120 Q60,115 120,70 T240,40 T360,50 T480,95 T600,85' },
+  { gravity: 88, cistern: 55, pressure: '2.6', flow: '6.8', acoustic: 'Active (48s)', wave: 'M0,100 Q60,85 120,40 T240,25 T360,35 T480,75 T600,60' },
+  { gravity: 62, cistern: 82, pressure: '2.2', flow: '1.2', acoustic: 'Standby', wave: 'M0,135 Q60,130 120,110 T240,85 T360,95 T480,120 T600,115' },
+];
+
+export function setupLanding(): Cleanup {
+  const cleanups: Cleanup[] = [];
+  const set = (id: string, text: string) => {
+    const el = byId(id);
+    if (el) el.innerText = text;
+  };
+
+  let step = 0;
+  listen(cleanups, byId('system-cycle-btn'), 'click', () => {
+    step = (step + 1) % CYCLE.length;
+    const s = CYCLE[step];
+    const gravity = byId('tank-gravity');
+    const cistern = byId('tank-cistern');
+    if (gravity) gravity.style.height = `${s.gravity}%`;
+    if (cistern) cistern.style.height = `${s.cistern}%`;
+    set('val-gravity', `${s.gravity}% (Simulated)`);
+    set('val-cistern', `${s.cistern}% (Simulated)`);
+    set('tele-pressure', s.pressure);
+    set('tele-flow', s.flow);
+    set('tele-acoustic', s.acoustic);
+    byId('telemetry-wave')?.setAttribute('d', s.wave);
+  });
+
+  const buttons = document.querySelectorAll<HTMLElement>('.topology-btn');
+  buttons.forEach((btn) => {
+    listen(cleanups, btn, 'click', () => {
+      const data = ZONES[btn.dataset.zone ?? ''];
+      if (!data) return;
+      buttons.forEach((b) => {
+        b.classList.remove('bg-primary', 'text-on-primary');
+        b.classList.add('bg-surface-container', 'text-on-surface');
+      });
+      btn.classList.remove('bg-surface-container', 'text-on-surface');
+      btn.classList.add('bg-primary', 'text-on-primary');
+      set('zone-display-title', data.title);
+      set('zone-desc', data.desc);
+      set('zone-status', data.status);
+      set('zone-pressure', data.pressure);
+      set('zone-jitter', data.jitter);
+      set('zone-tds', data.tds);
+      set('zone-db', data.db);
+    });
+  });
+
+  const form = byId('estate-intake-form');
+  listen(cleanups, form, 'submit', (e) => {
+    e.preventDefault();
+    byId('intake-success')?.classList.remove('hidden');
+    form?.classList.add('hidden');
+  });
+  return done(cleanups);
+}

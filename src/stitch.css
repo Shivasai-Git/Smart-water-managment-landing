@@ -48,3 +48,11 @@ html:has(.stitch-gen), body:has(.stitch-gen) { background: #F8F9FA; color-scheme
     linear-gradient(to bottom, rgba(226, 232, 240, 0.35) 1px, transparent 1px);
   background-size: 100% 100%, 100% 100%, 64px 64px, 64px 64px;
 }
+
+/* Landing page (Stitch export) */
+.stitch-landing { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8f9fa; color: #191c1d; -webkit-font-smoothing: antialiased; }
+html:has(.stitch-landing), body:has(.stitch-landing) { background: #f8f9fa; color: #191c1d; color-scheme: light; }
+.stitch-landing :focus-visible { outline: 2px solid #09090B; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  .stitch-landing *, .stitch-landing *::before, .stitch-landing *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
