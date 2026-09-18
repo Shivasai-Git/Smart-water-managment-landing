@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useMobileNav } from '../../hooks/useMobileNav';
 import { MobileNav } from './MobileNav';
 
@@ -36,12 +37,12 @@ export const Header: React.FC = () => {
         </nav>
 
         <div className="flex items-center gap-2">
-          <a
-            href="#capabilities"
+          <Link
+            to="/login"
             className="hidden sm:inline-flex font-mono text-[11px] tracking-[.12em] uppercase px-4 py-2 rounded-full bg-aqua text-ink font-medium hover:bg-mist transition-colors shadow-[0_0_12px_rgba(24,191,242,0.3)]"
           >
-            Explore System
-          </a>
+            Sign in
+          </Link>
           <button
             id="menuBtn"
             type="button"
