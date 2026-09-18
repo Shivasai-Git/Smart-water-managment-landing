@@ -47,7 +47,7 @@ export default function DashboardPage() {
           <MetricReadout label="Today's usage" value={phase === 'leak' ? '412' : '286'} unit="L" note="Daily budget 600 L" />
         </div>
         <div className="rounded-2xl border border-steel/20 bg-ink2 p-4">
-          <MetricReadout label="Water quality" value={qualityGood ? 'Good' : 'Attention'} note="pH · TDS · Turbidity · Temp" />
+          <MetricReadout label="Water quality" value={qualityGood ? 'Good' : 'Attention'} note="pH, TDS, Turbidity, Temp" />
         </div>
         <div className="rounded-2xl border border-steel/20 bg-ink2 p-4">
           <MetricReadout label="Active alerts" value={activeAlert ? 1 : 0} note={activeAlert ? 'Kitchen — possible leak' : 'None open'} />
