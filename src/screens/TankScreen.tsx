@@ -526,15 +526,15 @@ export default function TankScreen() {
                   <circle cx="480" cy="55" fill="#191c1d" r="4" />
                   <circle cx="500" cy="150" fill="#006c49" r="4" />
                 </svg>
-                <div className="flex justify-between text-[11px] font-mono text-on-surface-variant pt-2 select-none">
+                <div className="flex justify-between gap-1 text-[11px] font-mono text-on-surface-variant pt-2 select-none [&>span]:whitespace-nowrap">
                   <span>
-                    00:00 (Night Fill)
+                    00:00<span className="hidden sm:inline"> (Night Fill)</span>
                   </span>
                   <span>
                     04:00
                   </span>
                   <span>
-                    08:00 (Morning Peak)
+                    08:00<span className="hidden sm:inline"> (Morning Peak)</span>
                   </span>
                   <span>
                     12:00
@@ -543,7 +543,7 @@ export default function TankScreen() {
                     16:00
                   </span>
                   <span>
-                    20:00 (Evening Peak)
+                    20:00<span className="hidden sm:inline"> (Evening Peak)</span>
                   </span>
                   <span>
                     23:59

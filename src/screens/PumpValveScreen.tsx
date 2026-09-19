@@ -51,15 +51,15 @@ export default function PumpValveScreen() {
               </button>
             </div>
           </div>
-          <div className="flex items-center justify-between">
-            <div className="inline-flex p-1 rounded-full bg-surface-container-high/60 shadow-inner">
-              <button className="px-5 py-1.5 rounded-full bg-surface-container-lowest text-on-surface font-label-button text-label-button shadow-sm transition-all">
+          <div className="flex items-center justify-between min-w-0">
+            <div className="inline-flex max-w-full overflow-x-auto p-1 rounded-full bg-surface-container-high/60 shadow-inner [&>button]:shrink-0 [&>button]:whitespace-nowrap">
+              <button className="px-3 sm:px-5 py-1.5 rounded-full bg-surface-container-lowest text-on-surface font-label-button text-label-button shadow-sm transition-all">
                 Direct Command
               </button>
-              <button className="px-5 py-1.5 rounded-full text-on-surface-variant hover:text-on-surface font-label-button text-label-button transition-all">
+              <button className="px-3 sm:px-5 py-1.5 rounded-full text-on-surface-variant hover:text-on-surface font-label-button text-label-button transition-all">
                 Automated Schedules
               </button>
-              <button className="px-5 py-1.5 rounded-full text-on-surface-variant hover:text-on-surface font-label-button text-label-button transition-all">
+              <button className="px-3 sm:px-5 py-1.5 rounded-full text-on-surface-variant hover:text-on-surface font-label-button text-label-button transition-all">
                 Safety Interlocks
               </button>
             </div>
@@ -585,7 +585,8 @@ export default function PumpValveScreen() {
             </div>
             <div className="lg:col-span-4 flex flex-col space-y-space-md">
               <div className="bg-surface-container-lowest rounded-3xl overflow-hidden shadow-sm flex flex-col">
-                <div className="relative h-44 w-full bg-cover bg-center" data-alt="High-end architectural luxury mechanical room with stainless steel hydraulic piping, minimalist polished concrete walls, pristine matte black pumps and polished brass pressure gauges with clinical architectural lighting." style={{ backgroundImage: "url('/stitch/img-f05dc496a9.jpg')" }}>
+                <div className="relative h-44 w-full bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-900 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-white/25 text-[88px]">water_pump</span>
                   <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/20 to-transparent"></div>
                   <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between text-on-primary">
                     <div>

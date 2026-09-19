@@ -375,14 +375,14 @@ export default function ReportsScreen() {
                 Browse and retrieve verified telemetry exports, regulatory filings, and cost breakdowns.
               </p>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="relative">
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <div className="relative flex-1 min-w-0 sm:flex-none">
                 <span className="material-symbols-outlined text-slate-400 text-[18px] absolute left-3 top-2.5">
                   search
                 </span>
-                <input type="text" placeholder="Search reports..." className="pl-9 pr-4 py-2 rounded-full bg-slate-50 border border-slate-200/80 text-xs font-medium focus:outline-none focus:border-black transition-colors w-48 lg:w-60" />
+                <input type="text" placeholder="Search reports..." className="w-full sm:w-auto pl-9 pr-4 py-2 rounded-full bg-slate-50 border border-slate-200/80 text-xs font-medium focus:outline-none focus:border-black transition-colors w-48 lg:w-60" />
               </div>
-              <button className="flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors">
+              <button className="shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors">
                 <span className="material-symbols-outlined text-[16px]">
                   tune
                 </span>

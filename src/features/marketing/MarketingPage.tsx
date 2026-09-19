@@ -1,43 +1,45 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import FloatingNav from './FloatingNav';
+import ZoneMap from './ZoneMap';
+import { FluidFlowGrid } from '@/components/ui/fluid-flow-grid';
+import { useLandingMotion } from './useLandingMotion';
 import { setupLanding } from '../../screens/behaviors';
 
+/** Phones get a tighter, lighter grid so the dots stay fine and the wave stays cheap to paint. */
+function useCompactViewport() {
+  const [compact, setCompact] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 640px)').matches);
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 640px)');
+    const on = () => setCompact(mq.matches);
+    mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, []);
+  return compact;
+}
+
 export default function MarketingPage() {
+  const compact = useCompactViewport();
   useEffect(() => setupLanding(), []);
+  useLandingMotion();
   return (
     <div className="stitch-landing bg-surface font-body-md text-on-surface antialiased selection:bg-secondary selection:text-on-secondary">
-      <header className="fixed top-0 inset-x-0 z-50 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
-        <div className="h-20 w-full px-margin-lg flex items-center justify-between">
-          <div className="flex items-center gap-space-md">
-            <Link className="flex items-center gap-space-xs group" data-path="landing-page" to="/">
-              <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-on-primary group-hover:scale-95 transition-transform shrink-0">
-                <span className="material-symbols-outlined text-[20px]">
-                  water_drop
-                </span>
-              </div>
-              <div className="flex flex-col">
-                <span className="font-headline-sm text-headline-sm text-primary tracking-tight leading-none">
-                  SMART WATER FLOW
-                </span>
-                <span className="hidden sm:block font-label-uppercase text-label-uppercase text-secondary tracking-widest leading-none mt-1">
-                  RESIDENTIAL MVP • PROTOTYPE
-                </span>
-              </div>
-            </Link>
-          </div>
-          <div className="flex items-center gap-space-sm">
-            <Link className="inline-flex px-space-md py-2 rounded-full font-label-button text-label-button bg-surface-container text-on-surface hover:bg-surface-container-high active:scale-[0.98] transition-all whitespace-nowrap shrink-0" data-path="login" to="/login">
-              Sign In
-            </Link>
-          </div>
-        </div>
-      </header>
-      <main className="w-full pt-20 bg-surface min-h-[calc(100vh-80px)]">
+      <FloatingNav />
+      <main id="top" className="w-full pt-24 bg-surface min-h-[calc(100vh-80px)]">
         <div className="flex flex-col w-full">
-          <section className="relative w-full px-margin-sm md:px-margin lg:px-margin-lg pt-space-lg pb-space-xl overflow-hidden">
-            <div className="absolute -top-32 right-1/4 w-[580px] h-[580px] rounded-full bg-secondary-fixed/15 blur-[120px] pointer-events-none -z-10"></div>
-            <div className="absolute top-48 left-10 w-[420px] h-[420px] rounded-full bg-surface-container-high/60 blur-[100px] pointer-events-none -z-10"></div>
-            <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
+          <FluidFlowGrid
+            id="hero"
+            spacing={compact ? 30 : 36}
+            reach={compact ? 150 : 220}
+            fps={compact ? 30 : 60}
+            className="w-full px-margin-sm md:px-margin lg:px-margin-lg pt-space-lg pb-space-xl"
+          >
+            <div className="absolute -top-32 right-1/4 w-[580px] h-[580px] rounded-full blob-mint pointer-events-none -z-10 hero-blob"></div>
+            <div className="absolute top-48 left-10 w-[420px] h-[420px] rounded-full blob-stone pointer-events-none -z-10 hero-blob hero-blob-2"></div>
+            {/* Soft wash keeps the copy legible while rings pass underneath; the bottom fade blends into the next section. */}
+            <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_75%_38%_at_50%_38%,rgba(248,249,250,0.72)_0%,transparent_100%)] md:bg-[radial-gradient(ellipse_40%_40%_at_50%_42%,rgba(248,249,250,0.9)_0%,rgba(248,249,250,0.55)_45%,transparent_100%)]"></div>
+            <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-28 -z-10 bg-gradient-to-t from-[#f8f9fa] to-transparent"></div>
+            <div className="max-w-7xl mx-auto flex flex-col items-center text-center hero-stagger">
               <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-surface-container-lowest shadow-sm mb-space-md">
                 <span className="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
                 <span className="font-label-uppercase text-label-uppercase text-on-surface tracking-widest">
@@ -115,7 +117,7 @@ export default function MarketingPage() {
                 </div>
               </div>
             </div>
-          </section>
+          </FluidFlowGrid>
           <section className="w-full px-margin-sm md:px-margin lg:px-margin-lg py-space-xl" id="interactive-preview">
             <div className="max-w-7xl mx-auto">
               <div className="bg-surface-container-lowest bg-surface-container-lowest relative overflow-hidden p-6 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
@@ -355,7 +357,7 @@ export default function MarketingPage() {
               </div>
             </div>
           </section>
-          <section className="w-full px-margin-sm md:px-margin lg:px-margin-lg py-space-xl bg-surface-container-low">
+          <section id="features" className="w-full px-margin-sm md:px-margin lg:px-margin-lg py-space-xl bg-surface-container-low">
             <div className="max-w-7xl mx-auto">
               <div className="flex flex-col md:flex-row md:items-end justify-between mb-space-lg">
                 <div>
@@ -467,7 +469,7 @@ export default function MarketingPage() {
               </div>
             </div>
           </section>
-          <section className="w-full px-margin-sm md:px-margin lg:px-margin-lg py-space-xl">
+          <section id="topology" className="w-full px-margin-sm md:px-margin lg:px-margin-lg py-space-xl">
             <div className="max-w-7xl mx-auto">
               <div className="text-center max-w-2xl mx-auto mb-space-lg">
                 <span className="font-label-uppercase text-label-uppercase text-secondary tracking-widest block mb-space-xs">
@@ -526,19 +528,18 @@ export default function MarketingPage() {
                   </button>
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter-lg items-center">
-                  <div className="lg:col-span-7 relative rounded-3xl overflow-hidden h-[340px] bg-surface-container-high flex items-center justify-center">
-                    <div className="bg-cover bg-center w-full h-full" data-alt="Minimalist architectural blueprint schematic of an ultra luxury modern concrete and glass estate, showing glowing thin turquoise water supply vector lines, isometric hydraulic engineering overlay, monochrome background with crisp technical callouts" style={{ backgroundImage: "url('/stitch/img-50b6ad0361.jpg')" }}></div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-primary/60 via-transparent to-transparent"></div>
-                    <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-on-primary">
+                  <div className="lg:col-span-7 relative rounded-3xl overflow-hidden h-[320px] sm:h-[380px] bg-surface-container-lowest border border-outline-variant/40 pt-3 px-3 pb-20 sm:pb-16">
+                    <ZoneMap />
+                                        <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-primary">
                       <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-secondary-fixed">
+                        <span className="material-symbols-outlined text-secondary">
                           hub
                         </span>
                         <span className="font-headline-sm text-headline-sm" id="zone-display-title">
                           Kitchen &amp; Utility Inflow • Normal
                         </span>
                       </div>
-                      <span className="font-label-uppercase text-label-uppercase px-2.5 py-1 rounded-full bg-surface-container-lowest/20 backdrop-blur-md">
+                      <span className="hidden sm:inline font-label-uppercase text-label-uppercase px-2.5 py-1 rounded-full bg-surface-container-high">
                         ESP32 / IoT Controller
                       </span>
                     </div>
@@ -627,7 +628,7 @@ export default function MarketingPage() {
               </div>
             </div>
           </section>
-          <section className="w-full px-margin-sm md:px-margin lg:px-margin-lg py-space-xl bg-surface-container-low">
+          <section id="comparison" className="w-full px-margin-sm md:px-margin lg:px-margin-lg py-space-xl bg-surface-container-low">
             <div className="max-w-7xl mx-auto">
               <div className="flex flex-col md:flex-row md:items-end justify-between mb-space-lg">
                 <div>
@@ -863,11 +864,11 @@ export default function MarketingPage() {
               </div>
             </div>
           </section>
-          <section className="w-full px-margin-sm md:px-margin lg:px-margin-lg pb-space-xl">
+          <section id="contact" className="w-full px-margin-sm md:px-margin lg:px-margin-lg pb-space-xl">
             <div className="max-w-7xl mx-auto">
               <div className="bg-primary text-on-primary rounded-3xl p-space-lg md:p-space-xl relative overflow-hidden shadow-xl">
-                <div className="absolute -right-20 -bottom-20 w-[420px] h-[420px] rounded-full bg-secondary/20 blur-[90px] pointer-events-none"></div>
-                <div className="absolute -left-20 -top-20 w-[300px] h-[300px] rounded-full bg-secondary-container/10 blur-[80px] pointer-events-none"></div>
+                <div className="absolute -right-20 -bottom-20 w-[420px] h-[420px] rounded-full blob-emerald pointer-events-none"></div>
+                <div className="absolute -left-20 -top-20 w-[300px] h-[300px] rounded-full blob-emerald opacity-60 pointer-events-none"></div>
                 <div className="relative z-10 max-w-3xl">
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-highest/20 text-secondary-fixed font-label-uppercase text-label-uppercase mb-space-sm">
                     <span className="">
