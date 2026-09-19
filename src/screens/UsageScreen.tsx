@@ -23,7 +23,7 @@ export default function UsageScreen() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <div className="inline-flex p-1 bg-surface-container rounded-full shadow-inner" id="period-toggle-group">
+            <div className="inline-flex max-w-full overflow-x-auto p-1 bg-surface-container rounded-full shadow-inner [&>button]:shrink-0 [&>button]:whitespace-nowrap" id="period-toggle-group">
               <button className="px-3.5 py-1.5 rounded-full font-label-button text-label-button font-semibold bg-primary text-on-primary transition-all duration-200" type="button">
                 Today
               </button>
@@ -355,7 +355,7 @@ export default function UsageScreen() {
               </div>
             </div>
             <div className="space-y-3">
-              <div className="p-4 bg-surface-container-low rounded-2xl flex items-center justify-between hover:bg-surface-container transition-colors">
+              <div className="p-4 bg-surface-container-low rounded-2xl flex flex-wrap items-center justify-between gap-3 hover:bg-surface-container transition-colors">
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center">
                     <span className="material-symbols-outlined text-[20px]">
@@ -371,7 +371,7 @@ export default function UsageScreen() {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-3 sm:gap-6 flex-wrap justify-end min-w-0">
                   <div className="text-right">
                     <div className="font-headline-sm text-headline-sm text-on-surface font-semibold">
                       108{' '}
@@ -388,7 +388,7 @@ export default function UsageScreen() {
                   </span>
                 </div>
               </div>
-              <div className="p-4 bg-surface-container-low rounded-2xl flex items-center justify-between hover:bg-surface-container transition-colors">
+              <div className="p-4 bg-surface-container-low rounded-2xl flex flex-wrap items-center justify-between gap-3 hover:bg-surface-container transition-colors">
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-full bg-secondary text-on-secondary flex items-center justify-center">
                     <span className="material-symbols-outlined text-[20px]">
@@ -404,7 +404,7 @@ export default function UsageScreen() {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-3 sm:gap-6 flex-wrap justify-end min-w-0">
                   <div className="text-right">
                     <div className="font-headline-sm text-headline-sm text-on-surface font-semibold">
                       74{' '}
@@ -421,7 +421,7 @@ export default function UsageScreen() {
                   </span>
                 </div>
               </div>
-              <div className="p-4 bg-surface-container-low rounded-2xl flex items-center justify-between hover:bg-surface-container transition-colors">
+              <div className="p-4 bg-surface-container-low rounded-2xl flex flex-wrap items-center justify-between gap-3 hover:bg-surface-container transition-colors">
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-full bg-surface-container-highest text-on-surface flex items-center justify-center">
                     <span className="material-symbols-outlined text-[20px]">
@@ -437,7 +437,7 @@ export default function UsageScreen() {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-3 sm:gap-6 flex-wrap justify-end min-w-0">
                   <div className="text-right">
                     <div className="font-headline-sm text-headline-sm text-on-surface font-semibold">
                       60{' '}
@@ -454,7 +454,7 @@ export default function UsageScreen() {
                   </span>
                 </div>
               </div>
-              <div className="p-4 bg-surface-container-low rounded-2xl flex items-center justify-between hover:bg-surface-container transition-colors">
+              <div className="p-4 bg-surface-container-low rounded-2xl flex flex-wrap items-center justify-between gap-3 hover:bg-surface-container transition-colors">
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-full bg-surface-container-highest text-on-surface flex items-center justify-center">
                     <span className="material-symbols-outlined text-[20px]">
@@ -470,7 +470,7 @@ export default function UsageScreen() {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-3 sm:gap-6 flex-wrap justify-end min-w-0">
                   <div className="text-right">
                     <div className="font-headline-sm text-headline-sm text-on-surface font-semibold">
                       44{' '}
@@ -571,7 +571,7 @@ export default function UsageScreen() {
             </div>
             <div className="bg-surface-container-lowest bg-surface-container-lowest flex items-center gap-4 p-6 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
               <div className="w-20 h-20 rounded-2xl overflow-hidden shrink-0 bg-surface-container">
-                <img className="w-full h-full object-cover" data-alt="Minimalist luxury residential estate architectural detail featuring clean stone water fountains, modern water filtration piping, serene morning sunlight, slate gray and muted emerald green palette, sharp focus architectural photography." src="/stitch/img-b4d75f7fa0.jpg" />
+                <div className="w-full h-full bg-gradient-to-br from-emerald-50 to-sky-100 flex items-center justify-center text-secondary"><span className="material-symbols-outlined text-[36px]">water_drop</span></div>
               </div>
               <div className="flex flex-col justify-center">
                 <div className="flex items-center gap-2">
