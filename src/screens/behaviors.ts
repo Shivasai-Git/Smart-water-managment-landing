@@ -348,6 +348,7 @@ export function setupLanding(): Cleanup {
       set('zone-jitter', data.jitter);
       set('zone-tds', data.tds);
       set('zone-db', data.db);
+      document.querySelectorAll('#zone-map [data-zid]').forEach((g) => g.classList.toggle('is-active', g.getAttribute('data-zid') === btn.dataset.zone));
     });
   });
 

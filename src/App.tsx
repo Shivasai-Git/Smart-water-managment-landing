@@ -1,30 +1,30 @@
 // src/App.tsx
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './state/auth';
 
 import MarketingPage from './features/marketing/MarketingPage';
-import LoginPage from './features/auth/LoginPage';
-import AppShell from './features/app-shell/AppShell';
-import AdminShell from './features/app-shell/AdminShell';
+const LoginPage = lazy(() => import('./features/auth/LoginPage'));
+const AppShell = lazy(() => import('./features/app-shell/AppShell'));
+const AdminShell = lazy(() => import('./features/app-shell/AdminShell'));
 
-import DashboardScreen from './screens/DashboardScreen';
-import HomeSpatialScreen from './screens/HomeSpatialScreen';
-import UsageScreen from './screens/UsageScreen';
-import TankScreen from './screens/TankScreen';
-import QualityScreen from './screens/QualityScreen';
-import AlertsScreen from './screens/AlertsScreen';
-import PumpValveScreen from './screens/PumpValveScreen';
-import InsightsPage from './features/insights/InsightsPage';
-import ReportsScreen from './screens/ReportsScreen';
-import DevicesPage from './features/devices/DevicesPage';
-import SectionDetailPage from './features/sections/SectionDetailPage';
+const DashboardScreen = lazy(() => import('./screens/DashboardScreen'));
+const HomeSpatialScreen = lazy(() => import('./screens/HomeSpatialScreen'));
+const UsageScreen = lazy(() => import('./screens/UsageScreen'));
+const TankScreen = lazy(() => import('./screens/TankScreen'));
+const QualityScreen = lazy(() => import('./screens/QualityScreen'));
+const AlertsScreen = lazy(() => import('./screens/AlertsScreen'));
+const PumpValveScreen = lazy(() => import('./screens/PumpValveScreen'));
+const InsightsPage = lazy(() => import('./features/insights/InsightsPage'));
+const ReportsScreen = lazy(() => import('./screens/ReportsScreen'));
+const DevicesPage = lazy(() => import('./features/devices/DevicesPage'));
+const SectionDetailPage = lazy(() => import('./features/sections/SectionDetailPage'));
 
-import AdminOverviewPage from './features/admin/AdminOverviewPage';
-import AdminCustomersPage from './features/admin/AdminCustomersPage';
-import AdminDevicesPage from './features/admin/AdminDevicesPage';
-import AdminAlertsPage from './features/admin/AdminAlertsPage';
-import AdminAuditPage from './features/admin/AdminAuditPage';
+const AdminOverviewPage = lazy(() => import('./features/admin/AdminOverviewPage'));
+const AdminCustomersPage = lazy(() => import('./features/admin/AdminCustomersPage'));
+const AdminDevicesPage = lazy(() => import('./features/admin/AdminDevicesPage'));
+const AdminAlertsPage = lazy(() => import('./features/admin/AdminAlertsPage'));
+const AdminAuditPage = lazy(() => import('./features/admin/AdminAuditPage'));
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -46,6 +46,7 @@ export default function App() {
     <BrowserRouter>
       <ScrollToTop />
       <AuthProvider>
+          <Suspense fallback={null}>
           <Routes>
             <Route path="/" element={<MarketingPage />} />
             <Route path="/login" element={<LoginPage />} />
@@ -93,6 +94,7 @@ export default function App() {
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          </Suspense>
       </AuthProvider>
     </BrowserRouter>
   );

@@ -56,3 +56,48 @@ html:has(.stitch-landing), body:has(.stitch-landing) { background: #f8f9fa; colo
 @media (prefers-reduced-motion: reduce) {
   .stitch-landing *, .stitch-landing *::before, .stitch-landing *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }
+
+/* ---- Landing motion ---- */
+.stitch-landing .reveal { opacity: 0; transform: translateY(28px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1); }
+.stitch-landing .reveal.is-visible { opacity: 1; transform: none; }
+.stitch-landing .reveal-child { opacity: 0; transform: translateY(20px) scale(.98); transition: opacity .6s ease var(--reveal-delay,0ms), transform .6s cubic-bezier(.2,.7,.2,1) var(--reveal-delay,0ms); }
+.stitch-landing .is-visible .reveal-child, .stitch-landing .reveal-child.is-visible { opacity: 1; transform: none; }
+
+/* hero entrance: stagger direct children of the hero content column */
+@keyframes hero-rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+.hero-stagger > * { animation: hero-rise .8s cubic-bezier(.2,.7,.2,1) both; }
+.hero-stagger > *:nth-child(1) { animation-delay: .05s; }
+.hero-stagger > *:nth-child(2) { animation-delay: .15s; }
+.hero-stagger > *:nth-child(3) { animation-delay: .28s; }
+.hero-stagger > *:nth-child(4) { animation-delay: .4s; }
+.hero-stagger > *:nth-child(5) { animation-delay: .55s; }
+@keyframes blob-float { 0%,100% { transform: translate3d(0,0,0) scale(1); } 50% { transform: translate3d(30px,-24px,0) scale(1.08); } }
+.hero-blob { animation: blob-float 12s ease-in-out infinite; }
+.hero-blob-2 { animation-duration: 16s; animation-direction: reverse; }
+
+/* zone map */
+.zone-map .zone-room { fill: #fff; stroke: #cbd5e1; stroke-width: 1.5; transition: fill .35s, stroke .35s; }
+.zone-map .zone-plant { fill: #f1f5f9; stroke: #94a3b8; stroke-width: 1.5; }
+.zone-map .zone-label { font: 600 12px 'Plus Jakarta Sans', sans-serif; fill: #475569; transition: fill .3s; }
+.zone-map .zone-caption { font: 600 10px 'Plus Jakarta Sans', sans-serif; fill: #475569; }
+.zone-map .zone-trunk, .zone-map .zone-branch { fill: none; stroke: #cbd5e1; stroke-width: 4; stroke-linecap: round; }
+.zone-map .zone-flow { fill: none; stroke: #0ea5e9; stroke-width: 2; stroke-dasharray: 4 10; stroke-linecap: round; animation: zone-dash 1.4s linear infinite; }
+@keyframes zone-dash { to { stroke-dashoffset: -14; } }
+.zone-map .zone-sensor { fill: #94a3b8; }
+.zone-map .zone-g { cursor: default; }
+.zone-map .zone-g.is-active .zone-room { fill: rgba(111,251,190,.35); stroke: #006c49; stroke-width: 2.5; }
+.zone-map .zone-g.is-active .zone-label { fill: #006c49; }
+.zone-map .zone-g.is-active .zone-branch { stroke: #0ea5e9; }
+.zone-map .zone-g.is-active .zone-sensor { fill: #006c49; animation: sensor-ping 1.6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes sensor-ping { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.8); opacity: .5; } }
+
+/* ---- Performance ---- */
+/* Icon text stays invisible (in a fixed 1em box, so nothing shifts) until the icon font has loaded. */
+html.js:not(.icons-ready) .material-symbols-outlined { display: inline-block; width: 1em; height: 1em; overflow: hidden; color: transparent !important; }
+/* Blurred blobs are painted as gradients instead of filter: blur(), which is far cheaper to composite. */
+.hero-blob { will-change: transform; }
+.blob-mint { background: radial-gradient(closest-side, rgba(111,251,190,.28), rgba(111,251,190,0) 100%); }
+.blob-stone { background: radial-gradient(closest-side, rgba(231,232,233,.9), rgba(231,232,233,0) 100%); }
+.blob-emerald { background: radial-gradient(closest-side, rgba(0,108,73,.22), rgba(0,108,73,0) 100%); }
+/* Sections below the fold are not styled, laid out or painted until they approach the viewport. */
+.stitch-landing main > div > section { content-visibility: auto; contain-intrinsic-size: auto 900px; }
