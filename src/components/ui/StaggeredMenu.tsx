@@ -1,5 +1,12 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
-import { gsap } from 'gsap';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+type Gsap = (typeof import('gsap'))['gsap'];
+type Timeline = ReturnType<Gsap['timeline']>;
+type Tween = ReturnType<Gsap['to']>;
+
+// GSAP is only needed once the menu is opened, so it stays out of the landing bundle until then.
+let gsap: Gsap;
+let gsapLoading: Promise<Gsap> | null = null;
+const loadGsap = () => (gsapLoading ??= import('gsap').then((m) => (gsap = m.gsap)));
 import './StaggeredMenu.css';
 
 export interface StaggeredMenuItem {
@@ -65,29 +72,37 @@ export function StaggeredMenu({
   const iconRef = useRef<HTMLSpanElement>(null);
   const textInnerRef = useRef<HTMLSpanElement>(null);
   const toggleBtnRef = useRef<HTMLButtonElement>(null);
-  const openTlRef = useRef<gsap.core.Timeline | null>(null);
-  const closeTweenRef = useRef<gsap.core.Tween | null>(null);
-  const spinTweenRef = useRef<gsap.core.Tween | null>(null);
-  const textCycleAnimRef = useRef<gsap.core.Tween | null>(null);
+  const openTlRef = useRef<Timeline | null>(null);
+  const closeTweenRef = useRef<Tween | null>(null);
+  const spinTweenRef = useRef<Tween | null>(null);
+  const textCycleAnimRef = useRef<Tween | null>(null);
 
   const offscreen = position === 'left' ? -100 : 100;
 
-  useLayoutEffect(() => {
-    const ctx = gsap.context(() => {
-      const panel = panelRef.current;
-      const preContainer = preLayersRef.current;
-      if (!panel || !plusHRef.current || !plusVRef.current || !iconRef.current || !textInnerRef.current) return;
+  const initForRef = useRef<number | null>(null);
 
-      preLayerElsRef.current = preContainer ? Array.from(preContainer.querySelectorAll<HTMLElement>('.sm-prelayer')) : [];
-      gsap.set([panel, ...preLayerElsRef.current], { xPercent: offscreen, opacity: 1 });
-      if (preContainer) gsap.set(preContainer, { xPercent: 0, opacity: 1 });
-      gsap.set(plusHRef.current, { transformOrigin: '50% 50%', rotate: 0 });
-      gsap.set(plusVRef.current, { transformOrigin: '50% 50%', rotate: 90 });
-      gsap.set(iconRef.current, { rotate: 0, transformOrigin: '50% 50%' });
-      gsap.set(textInnerRef.current, { yPercent: 0 });
-    });
-    return () => ctx.revert();
+  // Mirrors the CSS resting state onto GSAP so its transforms take over cleanly.
+  const initGsapState = useCallback(() => {
+    if (initForRef.current === offscreen) return;
+    const panel = panelRef.current;
+    const preContainer = preLayersRef.current;
+    if (!panel || !plusHRef.current || !plusVRef.current || !iconRef.current || !textInnerRef.current) return;
+    initForRef.current = offscreen;
+
+    preLayerElsRef.current = preContainer ? Array.from(preContainer.querySelectorAll<HTMLElement>('.sm-prelayer')) : [];
+    gsap.set([panel, ...preLayerElsRef.current], { x: 0, xPercent: offscreen, opacity: 1 });
+    if (preContainer) gsap.set(preContainer, { xPercent: 0, opacity: 1 });
+    gsap.set(plusHRef.current, { transformOrigin: '50% 50%', rotate: 0 });
+    gsap.set(plusVRef.current, { transformOrigin: '50% 50%', rotate: 90 });
+    gsap.set(iconRef.current, { rotate: 0, transformOrigin: '50% 50%' });
+    gsap.set(textInnerRef.current, { yPercent: 0 });
   }, [offscreen]);
+
+  // Warm the GSAP chunk shortly after load (also triggered by the first hint of interaction).
+  useEffect(() => {
+    const id = window.setTimeout(() => void loadGsap(), 5000);
+    return () => clearTimeout(id);
+  }, []);
 
   const resetPanelContent = useCallback(() => {
     const panel = panelRef.current;
@@ -191,21 +206,20 @@ export function StaggeredMenu({
   }, []);
 
   const setMenu = useCallback(
-    (target: boolean) => {
+    async (target: boolean) => {
       if (openRef.current === target) return;
       openRef.current = target;
       setOpen(target);
-      if (target) {
-        onMenuOpen?.();
-        playOpen();
-      } else {
-        onMenuClose?.();
-        playClose();
-      }
+      if (target) onMenuOpen?.();
+      else onMenuClose?.();
+      await loadGsap();
+      initGsapState();
+      if (target) playOpen();
+      else playClose();
       animateIcon(target);
       animateText(target);
     },
-    [playOpen, playClose, animateIcon, animateText, onMenuOpen, onMenuClose],
+    [initGsapState, playOpen, playClose, animateIcon, animateText, onMenuOpen, onMenuClose],
   );
 
   // Click-away, Escape and scroll lock while open
@@ -273,7 +287,10 @@ export function StaggeredMenu({
             aria-label={open ? 'Close menu' : 'Open menu'}
             aria-expanded={open}
             aria-controls="staggered-menu-panel"
-            onClick={() => setMenu(!openRef.current)}
+            onClick={() => void setMenu(!openRef.current)}
+            onPointerEnter={() => void loadGsap()}
+            onFocus={() => void loadGsap()}
+            onTouchStart={() => void loadGsap()}
             type="button"
           >
             <span className="sm-toggle-textWrap" aria-hidden="true">
