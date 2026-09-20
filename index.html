@@ -9,25 +9,13 @@
     <title>Smart Water Flow — intelligent water management</title>
     <script>
       document.documentElement.classList.add('js');
-      // Fallback so icons never stay hidden if the font request is blocked.
+      // Icons stay hidden (see stitch.css) until the icon font is ready; fallback so they never stay hidden.
       setTimeout(function () { document.documentElement.classList.add('icons-ready'); }, 3500);
+      addEventListener('DOMContentLoaded', function () {
+        document.fonts && document.fonts.load('24px "Material Symbols Outlined"').then(function () { document.documentElement.classList.add('icons-ready'); });
+      });
     </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/plusjakartasans/v12/LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko20yygg_vb.woff2" />
-    <!-- One non-blocking request for every font; icons stay hidden (see stitch.css) until the icon font is ready. -->
-    <link
-      rel="stylesheet"
-      media="print"
-      onload="this.media='all';this.onload=null;document.fonts&&document.fonts.load('24px &quot;Material Symbols Outlined&quot;').then(function(){document.documentElement.classList.add('icons-ready')})"
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Bricolage+Grotesque:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap"
-    />
-    <noscript>
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap"
-      />
-    </noscript>
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/plus-jakarta-sans-latin-fdb05b.woff2" />
   </head>
   <body>
     <div id="root"></div>

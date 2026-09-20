@@ -1,0 +1,21 @@
+{
+  "default_branch": "main",
+  "branches": [
+    "feat/stitch-ui",
+    "main",
+    "origin",
+    "worktree-residential-monitoring-platform"
+  ],
+  "parent": {
+    "feat/stitch-ui": "main",
+    "main": null,
+    "origin": "main",
+    "worktree-residential-monitoring-platform": "main"
+  },
+  "order": [
+    "main",
+    "feat/stitch-ui",
+    "origin",
+    "worktree-residential-monitoring-platform"
+  ]
+}

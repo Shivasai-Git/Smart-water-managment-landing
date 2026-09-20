@@ -189,6 +189,21 @@
   opacity: 0;
 }
 
+/* Resting (closed) state, so nothing depends on GSAP having loaded yet */
+.staggered-menu-panel,
+.sm-prelayer {
+  transform: translateX(100%);
+}
+
+[data-position='left'] .staggered-menu-panel,
+[data-position='left'] .sm-prelayer {
+  transform: translateX(-100%);
+}
+
+.sm-icon-line:last-child {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
 .sm-panel-inner {
   flex: 1;
   display: flex;

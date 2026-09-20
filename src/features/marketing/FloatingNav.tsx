@@ -61,8 +61,8 @@ export default function FloatingNav() {
         onSelect: () => go(l.id),
       }))}
       logo={
-        <Link className="flex items-center gap-2" to="/" onClick={() => go('top')} aria-label="Smart Water Flow home">
-          <span className="w-9 h-9 rounded-full bg-primary text-on-primary flex items-center justify-center">
+        <Link className="flex items-center gap-2" to="/" onClick={() => go('top')}>
+          <span aria-hidden="true" className="w-9 h-9 rounded-full bg-primary text-on-primary flex items-center justify-center">
             <span className="material-symbols-outlined text-[20px]">water_drop</span>
           </span>
           <span className="font-headline-sm text-headline-sm text-primary tracking-tight truncate">SMART WATER FLOW</span>
