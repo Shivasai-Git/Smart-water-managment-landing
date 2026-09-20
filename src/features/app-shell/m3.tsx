@@ -1,21 +1,13 @@
 import type { ReactNode } from 'react';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 
 /** Building blocks that reproduce the Stitch "Hydro Architect" page furniture used by the exported screens. */
 
-export function TopBar({ crumb = 'Founder residence', code = 'FR-0814', onMenu }: { crumb?: string; code?: string; onMenu?: () => void }) {
+export function TopBar({ crumb = 'Founder residence', code = 'FR-0814' }: { crumb?: string; code?: string }) {
   return (
     <header className="sticky top-4 mt-4 h-16 bg-surface-container-lowest/80 backdrop-blur-xl rounded-3xl shadow-[0_4px_24px_rgba(0,0,0,0.03)] z-40 px-4 sm:px-6 flex items-center justify-between gap-3">
       <div className="flex items-center gap-3 min-w-0">
-        {onMenu && (
-          <button
-            type="button"
-            onClick={onMenu}
-            aria-label="Open navigation"
-            className="lg:hidden w-9 h-9 shrink-0 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"
-          >
-            <span className="material-symbols-outlined text-[20px]">menu</span>
-          </button>
-        )}
+        <SidebarTrigger />
         <div className="flex items-center gap-2 font-body-md text-body-md text-on-surface-variant min-w-0">
           <span className="hidden sm:inline text-on-surface-variant">Installation</span>
           <span className="hidden sm:inline material-symbols-outlined text-[16px]">chevron_right</span>
